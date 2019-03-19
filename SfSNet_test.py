@@ -22,7 +22,7 @@ def weights_init(m):
 if __name__ == '__main__':
     net = SfSNet()
     net.eval()
-    net.load_weights_from_pkl('wow/weights.pkl')
+    net.load_weights_from_pkl('wow/weights1.pkl')
 
     image = cv2.imread('1.png_face.png')
     im = cv2.resize(image, (M, M))
