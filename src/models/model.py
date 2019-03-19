@@ -53,7 +53,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         self.nbn6r = nn.BatchNorm2d(128)
         # CD128
         # TODO 初始化器 bilinear
-        self.nup6 = nn.ConvTranspose2d(128, 128, 4, 2, 1, groups=128)
+        self.nup6 = nn.ConvTranspose2d(128, 128, 4, 2, 1, groups=128, bias=False)
         # nconv6
         self.nconv6 = nn.Conv2d(128, 128, 1, 1, 0)
         # nbn6
@@ -79,7 +79,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # abn6r
         self.abn6r = nn.BatchNorm2d(128)
         # CD128
-        self.aup6 = nn.ConvTranspose2d(128, 128, 4, 2, 1, groups=128)
+        self.aup6 = nn.ConvTranspose2d(128, 128, 4, 2, 1, groups=128, bias=False)
         # nconv6
         self.aconv6 = nn.Conv2d(128, 128, 1, 1, 0)
         # nbn6
@@ -166,6 +166,65 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
 
         return normal, albedo, light
 
+    def load_weights_from_pkl2(self, weights_pkl):
+        from torch import from_numpy
+        with open(weights_pkl, 'rb') as wp:
+            name_weights = pkl.load(wp)
+            state_dict = {}
+
+            def _set_deconv(layer, key):
+                state_dict[layer+'.weight'] = from_numpy(name_weights[key]['weight'])
+
+            def _set_conv(layer, key):
+                state_dict[layer + '.weight'] = from_numpy(name_weights[key]['weight'])
+                state_dict[layer + '.bias'] = from_numpy(name_weights[key]['bias'])
+
+            def _set_bn(layer, key):
+                state_dict[layer + '.weight'] = from_numpy(name_weights[key]['weight'])
+                state_dict[layer + '.bias'] = from_numpy(name_weights[key]['bias'])
+                state_dict[layer + '.running_var'] = from_numpy(name_weights[key]['weight'])
+                state_dict[layer + '.running_mean'] = from_numpy(name_weights[key]['bias'])
+
+            def _set_res(layer, n_or_a, index):
+                _set_bn(layer+'.bn', n_or_a + 'bn' + str(index))
+                _set_conv(layer+'.conv', n_or_a + 'conv' + str(index))
+                _set_bn(layer+'.bnr', n_or_a + 'bn' + str(index) + 'r')
+                _set_conv(layer+'.convr', n_or_a + 'conv' + str(index) + 'r')
+
+            _set_conv('conv1', 'conv1')
+            _set_bn('bn1', 'bn1')
+            _set_conv('conv2', 'conv2')
+            _set_bn('bn2', 'bn2')
+            _set_conv('conv3', 'conv3')
+            _set_res('n_res1', 'n', 1)
+            _set_res('n_res2', 'n', 2)
+            _set_res('n_res3', 'n', 3)
+            _set_res('n_res4', 'n', 4)
+            _set_res('n_res5', 'n', 5)
+            _set_bn('nbn6r', 'nbn6r')
+            _set_deconv('nup6', 'nup6')
+            _set_conv('nconv6', 'nconv6')
+            _set_bn('nbn6', 'nbn6')
+            _set_conv('nconv7', 'nconv7')
+            _set_bn('nbn7', 'nbn7')
+            _set_conv('nconv0', 'Nconv0')
+            _set_res('a_res1', 'a', 1)
+            _set_res('a_res2', 'a', 2)
+            _set_res('a_res3', 'a', 3)
+            _set_res('a_res4', 'a', 4)
+            _set_res('a_res5', 'a', 5)
+            _set_bn('abn6r', 'abn6r')
+            _set_deconv('aup6', 'aup6')
+            _set_conv('aconv6', 'aconv6')
+            _set_bn('abn6', 'abn6')
+            _set_conv('aconv7', 'aconv7')
+            _set_bn('abn7', 'abn7')
+            _set_conv('aconv0', 'Aconv0')
+            _set_conv('lconv1', 'lconv1')
+            _set_bn('lbn1', 'lbn1')
+            _set_conv('fc_light', 'fc_light')
+            self.load_state_dict(state_dict)
+
     def load_weights_from_pkl(self, weights_pkl):
         from torch import from_numpy
         with open(weights_pkl, 'rb') as wp:
@@ -173,10 +232,6 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
 
             def _set_deconv(layer, key):
                 layer.weight.data = from_numpy(name_weights[key]['weight'])
-
-            def _set_bn(layer, key):
-                layer.weight.data = from_numpy(name_weights[key]['bias'])
-                layer.bias.data = from_numpy(name_weights[key]['weight'])
 
             def _set(layer, key):
                 layer.weight.data = from_numpy(name_weights[key]['weight'])
