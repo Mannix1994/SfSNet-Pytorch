@@ -27,11 +27,18 @@ if __name__ == '__main__':
     image = cv2.imread('1.png_face.png')
     im = cv2.resize(image, (M, M))
     im = np.float32(im) / 255.0
+    # im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     im = np.transpose(im, [2, 0, 1])  # from (128, 128, 3) to (1, 3, 128, 128)
     im = np.expand_dims(im, 0)
     print(np.min(im), np.max(im))
 
-    normal, albedo, light = net(torch.from_numpy(im))
+    x = net(torch.from_numpy(im))
 
-    print(light.detach().numpy())
+    print(x[2].detach().numpy())
+
+    # print(net.bn1.state_dict().keys())
+    # for name, parm in net.bn1.state_dict().items():
+    #     print(name, parm.size())
+    # for name, parm in net.named_parameters():
+    #     print(name)
 

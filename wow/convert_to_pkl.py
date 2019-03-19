@@ -6,10 +6,6 @@ import os
 import numpy as np
 import pickle as pkl
 import traceback
-
-
-CAFFE_ROOT = "/home/creator/Apps/caffe"
-sys.path.insert(0, os.path.join(CAFFE_ROOT, 'python'))
 import caffe
 
 # deploy文件
