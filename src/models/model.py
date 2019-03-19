@@ -166,7 +166,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
 
         return normal, albedo, light
 
-    def load_weights_from_pkl2(self, weights_pkl):
+    def load_weights_from_pkl1(self, weights_pkl):
         from torch import from_numpy
         with open(weights_pkl, 'rb') as wp:
             name_weights = pkl.load(wp)
@@ -180,10 +180,10 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
                 state_dict[layer + '.bias'] = from_numpy(name_weights[key]['bias'])
 
             def _set_bn(layer, key):
-                state_dict[layer + '.weight'] = from_numpy(name_weights[key]['weight'])
-                state_dict[layer + '.bias'] = from_numpy(name_weights[key]['bias'])
-                state_dict[layer + '.running_var'] = from_numpy(name_weights[key]['weight'])
-                state_dict[layer + '.running_mean'] = from_numpy(name_weights[key]['bias'])
+                state_dict[layer + '.running_var'] = from_numpy(name_weights[key]['running_var'])
+                state_dict[layer + '.running_mean'] = from_numpy(name_weights[key]['running_mean'])
+                state_dict[layer + '.weight'] = torch.ones_like(state_dict[layer + '.running_var'])
+                state_dict[layer + '.bias'] = torch.zeros_like(state_dict[layer + '.running_var'])
 
             def _set_res(layer, n_or_a, index):
                 _set_bn(layer+'.bn', n_or_a + 'bn' + str(index))
