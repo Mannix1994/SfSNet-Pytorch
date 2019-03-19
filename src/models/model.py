@@ -166,13 +166,17 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
 
         return normal, albedo, light
 
-    def apply_weights_from_pkl(self, weights_pkl):
+    def load_weights_from_pkl(self, weights_pkl):
         from torch import from_numpy
         with open(weights_pkl, 'rb') as wp:
             name_weights = pkl.load(wp)
 
-            def _set_weight(layer, key):
+            def _set_deconv(layer, key):
                 layer.weight.data = from_numpy(name_weights[key]['weight'])
+
+            def _set_bn(layer, key):
+                layer.weight.data = from_numpy(name_weights[key]['bias'])
+                layer.bias.data = from_numpy(name_weights[key]['weight'])
 
             def _set(layer, key):
                 layer.weight.data = from_numpy(name_weights[key]['weight'])
@@ -194,7 +198,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_res(self.n_res4, 'n', 4)
             _set_res(self.n_res5, 'n', 5)
             _set(self.nbn6r, 'nbn6r')
-            _set_weight(self.nup6, 'nup6')
+            _set_deconv(self.nup6, 'nup6')
             _set(self.nconv6, 'nconv6')
             _set(self.nbn6, 'nbn6')
             _set(self.nconv7, 'nconv7')
@@ -206,7 +210,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_res(self.a_res4, 'a', 4)
             _set_res(self.a_res5, 'a', 5)
             _set(self.abn6r, 'abn6r')
-            _set_weight(self.aup6, 'aup6')
+            _set_deconv(self.aup6, 'aup6')
             _set(self.aconv6, 'aconv6')
             _set(self.abn6, 'abn6')
             _set(self.aconv7, 'aconv7')
