@@ -22,8 +22,8 @@ def weights_init(m):
 
 if __name__ == '__main__':
     net = SfSNet()
-    # net.eval()
-    net.load_weights_from_pkl1('wow/weights.pkl')
+    net.eval()
+    net.load_weights_from_pkl('wow/weights.pkl')
 
     image = cv2.imread('1.png_face.png')
     im = cv2.resize(image, (M, M))
@@ -89,6 +89,8 @@ if __name__ == '__main__':
     # -----------add by wang------------
     Ishd = np.float32(Ishd)
     Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
+
+    print(np.min(al_out2))
 
     al_out2 = (al_out2 / np.max(al_out2) * 255).astype(dtype=np.uint8)
     Irec = (Irec / np.max(Irec) * 255).astype(dtype=np.uint8)

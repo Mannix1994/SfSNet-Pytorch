@@ -36,32 +36,32 @@ if __name__ == '__main__':
             # 权重参数
             weight = layer_params[0].data
             name_weights[param_name]['weight'] = weight
+
             print('%s:\n\t%s (weight)' % (param_name, weight.shape))
             keys.write('%s:\n\t%s (weight)\n' % (param_name, weight.shape))
         elif len(layer_params) == 2:  # 卷积层
             # 权重参数
             weight = layer_params[0].data
             name_weights[param_name]['weight'] = weight
-            print('%s:\n\t%s (weight)' % (param_name, weight.shape))
-            keys.write('%s:\n\t%s (weight)\n' % (param_name, weight.shape))
-
             # 偏置参数
             bias = layer_params[1].data
             name_weights[param_name]['bias'] = bias
+
+            print('%s:\n\t%s (weight)' % (param_name, weight.shape))
             print('\t%s (bias)' % str(bias.shape))
+            keys.write('%s:\n\t%s (weight)\n' % (param_name, weight.shape))
             keys.write('\t%s (bias)\n' % str(bias.shape))
         elif len(layer_params) == 3:  # BatchNorm
-            # 权重参数
-            running_var = layer_params[0].data
+            # running_mean
+            running_mean = layer_params[0].data
+            name_weights[param_name]['running_mean'] = running_mean / layer_params[2].data
+            # running_var
+            running_var = layer_params[1].data
             name_weights[param_name]['running_var'] = running_var/layer_params[2].data
 
             print('%s:\n\t%s (running_var)' % (param_name, running_var.shape),)
-            keys.write('%s:\n\t%s (running_var)\n' % (param_name, running_var.shape))
-
-            # 偏置参数
-            running_mean = layer_params[1].data
-            name_weights[param_name]['running_mean'] = running_mean/layer_params[2].data
             print('\t%s (running_mean)' % str(running_mean.shape))
+            keys.write('%s:\n\t%s (running_var)\n' % (param_name, running_var.shape))
             keys.write('\t%s (running_mean)\n' % str(running_mean.shape))
     keys.close()
     with open('weights.pkl', 'wb') as f:

@@ -11,11 +11,11 @@ class ResidualBlock(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(ResidualBlock, self).__init__()
         # nbn1/nbn2/.../nbn5 abn1/abn2/.../abn5
-        self.bn = nn.BatchNorm2d(in_channel)
+        self.bn = nn.BatchNorm2d(in_channel, affine=False)
         # nconv1/nconv2/.../nconv5 aconv1/aconv2/.../aconv5
         self.conv = nn.Conv2d(in_channel, out_channel, kernel_size=3, stride=1, padding=1)
         # nbn1r/nbn2r/.../nbn5r abn1r/abn2r/.../abn5r
-        self.bnr = nn.BatchNorm2d(out_channel)
+        self.bnr = nn.BatchNorm2d(out_channel, affine=False)
         # nconv1r/nconv2r/.../nconv5r aconv1r/aconv2r/.../anconv5r
         self.convr = nn.Conv2d(out_channel, out_channel, kernel_size=3, stride=1, padding=1)
 
@@ -32,10 +32,10 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         super(SfSNet, self).__init__()
         # TODO 初始化器 xavier
         self.conv1 = nn.Conv2d(3, 64, 7, 1, 3)
-        self.bn1 = nn.BatchNorm2d(64)
+        self.bn1 = nn.BatchNorm2d(64, affine=False)
         # C128
         self.conv2 = nn.Conv2d(64, 128, 3, 1, 1)
-        self.bn2 = nn.BatchNorm2d(128)
+        self.bn2 = nn.BatchNorm2d(128, affine=False)
         # C128 S2
         self.conv3 = nn.Conv2d(128, 128, 3, 2, 1)
         # ------------RESNET for normals------------
@@ -50,18 +50,18 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # RES5
         self.n_res5 = ResidualBlock(128, 128)
         # nbn6r
-        self.nbn6r = nn.BatchNorm2d(128)
+        self.nbn6r = nn.BatchNorm2d(128, affine=False)
         # CD128
         # TODO 初始化器 bilinear
         self.nup6 = nn.ConvTranspose2d(128, 128, 4, 2, 1, groups=128, bias=False)
         # nconv6
         self.nconv6 = nn.Conv2d(128, 128, 1, 1, 0)
         # nbn6
-        self.nbn6 = nn.BatchNorm2d(128)
+        self.nbn6 = nn.BatchNorm2d(128, affine=False)
         # CD 64
         self.nconv7 = nn.Conv2d(128, 64, 3, 1, 1)
         # nbn7
-        self.nbn7 = nn.BatchNorm2d(64)
+        self.nbn7 = nn.BatchNorm2d(64, affine=False)
         # C*3
         self.nconv0 = nn.Conv2d(64, 3, 1, 1, 0)
 
@@ -77,17 +77,17 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # RES5
         self.a_res5 = ResidualBlock(128, 128)
         # abn6r
-        self.abn6r = nn.BatchNorm2d(128)
+        self.abn6r = nn.BatchNorm2d(128, affine=False)
         # CD128
         self.aup6 = nn.ConvTranspose2d(128, 128, 4, 2, 1, groups=128, bias=False)
         # nconv6
         self.aconv6 = nn.Conv2d(128, 128, 1, 1, 0)
         # nbn6
-        self.abn6 = nn.BatchNorm2d(128)
+        self.abn6 = nn.BatchNorm2d(128, affine=False)
         # CD 64
         self.aconv7 = nn.Conv2d(128, 64, 3, 1, 1)
         # nbn7
-        self.abn7 = nn.BatchNorm2d(64)
+        self.abn7 = nn.BatchNorm2d(64, affine=False)
         # C*3
         self.aconv0 = nn.Conv2d(64, 3, 1, 1, 0)
 
@@ -95,7 +95,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # lconv1
         self.lconv1 = nn.Conv2d(384, 128, 1, 1, 0)
         # lbn1
-        self.lbn1 = nn.BatchNorm2d(128)
+        self.lbn1 = nn.BatchNorm2d(128, affine=False)
         # lpool2r
         self.lpool2r = nn.AvgPool2d(64)
         # fc_light
@@ -166,7 +166,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
 
         return normal, albedo, light
 
-    def load_weights_from_pkl1(self, weights_pkl):
+    def load_weights_from_pkl(self, weights_pkl):
         from torch import from_numpy
         with open(weights_pkl, 'rb') as wp:
             name_weights = pkl.load(wp)
@@ -182,8 +182,10 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             def _set_bn(layer, key):
                 state_dict[layer + '.running_var'] = from_numpy(name_weights[key]['running_var'])
                 state_dict[layer + '.running_mean'] = from_numpy(name_weights[key]['running_mean'])
-                state_dict[layer + '.weight'] = torch.ones_like(state_dict[layer + '.running_var'])
-                state_dict[layer + '.bias'] = torch.zeros_like(state_dict[layer + '.running_var'])
+                # state_dict[layer + '.running_var'] = from_numpy(name_weights[key]['running_mean'])
+                # state_dict[layer + '.running_mean'] = from_numpy(name_weights[key]['running_var'])
+                # state_dict[layer + '.weight'] = torch.ones_like(state_dict[layer + '.running_var'])
+                # state_dict[layer + '.bias'] = torch.zeros_like(state_dict[layer + '.running_var'])
 
             def _set_res(layer, n_or_a, index):
                 _set_bn(layer+'.bn', n_or_a + 'bn' + str(index))
@@ -225,6 +227,8 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_conv('fc_light', 'fc_light')
             self.load_state_dict(state_dict)
 
+
+    """
     def load_weights_from_pkl(self, weights_pkl):
         from torch import from_numpy
         with open(weights_pkl, 'rb') as wp:
@@ -274,6 +278,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set(self.lconv1, 'lconv1')
             _set(self.lbn1, 'lbn1')
             _set(self.fc_light, 'fc_light')
+    """
 
 
 if __name__ == '__main__':
