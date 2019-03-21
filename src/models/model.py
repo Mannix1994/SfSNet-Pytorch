@@ -64,7 +64,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # nbn7
         self.nbn7 = nn.BatchNorm2d(64, affine=bn_affine)
         # C*3
-        self.nconv0 = nn.Conv2d(64, 3, 1, 1, 0)
+        self.Nconv0 = nn.Conv2d(64, 3, 1, 1, 0)
 
         # --------------------Albedo---------------
         # RES1
@@ -90,7 +90,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # nbn7
         self.abn7 = nn.BatchNorm2d(64, affine=bn_affine)
         # C*3
-        self.aconv0 = nn.Conv2d(64, 3, 1, 1, 0)
+        self.Aconv0 = nn.Conv2d(64, 3, 1, 1, 0)
 
         # ---------------Light------------------
         # lconv1
@@ -121,15 +121,15 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # RES5
         nsum5 = self.n_res5(x)
         # nbn6r
-        x = F.relu(self.nbn6r(nsum5))
+        nrelu6r = F.relu(self.nbn6r(nsum5))
         # CD128
-        x = self.nup6(x)
+        x = self.nup6(nrelu6r)
         # nconv6/nbn6/nrelu6
         x = F.relu(self.nbn6(self.nconv6(x)))
         # nconv7/nbn7/nrelu7
         x = F.relu(self.nbn7(self.nconv7(x)))
         # nconv0
-        normal = self.nconv0(x)
+        normal = self.Nconv0(x)
         # --------------------Albedo---------------
         # RES1
         x = self.a_res1(conv3)
@@ -142,19 +142,18 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # RES5
         asum5 = self.a_res5(x)
         # nbn6r
-        x = F.relu(self.abn6r(asum5))
+        arelu6r = F.relu(self.abn6r(asum5))
         # CD128
-        x = self.aup6(x)
+        x = self.aup6(arelu6r)
         # nconv6/nbn6/nrelu6
         x = F.relu(self.abn6(self.aconv6(x)))
         # nconv7/nbn7/nrelu7
         x = F.relu(self.abn7(self.aconv7(x)))
         # nconv0
-        albedo = self.aconv0(x)
+        albedo = self.Aconv0(x)
         # ---------------Light------------------
         # lconcat1, shape(1 256 64 64)
-        x = torch.cat((nsum5, asum5), 1)
-        return x
+        x = torch.cat((nrelu6r, arelu6r), 1)
         # lconcat2, shape(1 384 64 64)
         x = torch.cat([x, conv3], 1)
         # lconv1/lbn1/lrelu1 shape(1 128 64 64)
@@ -209,7 +208,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_bn('nbn6', 'nbn6')
             _set_conv('nconv7', 'nconv7')
             _set_bn('nbn7', 'nbn7')
-            _set_conv('nconv0', 'Nconv0')
+            _set_conv('Nconv0', 'Nconv0')
             _set_res('a_res1', 'a', 1)
             _set_res('a_res2', 'a', 2)
             _set_res('a_res3', 'a', 3)
@@ -221,7 +220,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_bn('abn6', 'abn6')
             _set_conv('aconv7', 'aconv7')
             _set_bn('abn7', 'abn7')
-            _set_conv('aconv0', 'Aconv0')
+            _set_conv('Aconv0', 'Aconv0')
             _set_conv('lconv1', 'lconv1')
             _set_bn('lbn1', 'lbn1')
             _set_conv('fc_light', 'fc_light')
