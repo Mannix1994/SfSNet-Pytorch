@@ -7,7 +7,8 @@ import pickle as pkl
 from torch.nn import init, Parameter
 from src.models.model import SfSNet
 from src.functions import create_shading_recon
-from config import M
+from src.mask import MaskGenerator
+from config import M, LANDMARK_PATH
 
 
 def weights_init(m):
@@ -25,13 +26,26 @@ if __name__ == '__main__':
     net.eval()
     net.load_weights_from_pkl('wow/weights.pkl')
 
+    mg = MaskGenerator(LANDMARK_PATH)
     image = cv2.imread('1.png_face.png')
+    mask = np.ones((M, M))
+    # mask, im = mg.align(image, crop_size=(M, M))
     im = cv2.resize(image, (M, M))
     im = np.float32(im) / 255.0
     # im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     im = np.transpose(im, [2, 0, 1])  # from (128, 128, 3) to (1, 3, 128, 128)
     im = np.expand_dims(im, 0)
     print(np.min(im), np.max(im))
+
+    conv1 = net(torch.from_numpy(im))
+    npp = conv1.detach().numpy()
+    print(npp.shape)
+    print(npp[0, :, 0, 0])
+    duibi = np.load('data/data.npy')
+    indices = np.arange(0, 256, 1)
+    print(np.sum(np.abs(npp[:, indices, :, :]-duibi[:, indices, :, :])))
+    np.save('data/data1.npy', npp)
+    exit()
 
     normal, albedo, light = net(torch.from_numpy(im))
 
