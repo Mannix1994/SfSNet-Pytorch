@@ -31,7 +31,7 @@ def save(path, arr):
 if __name__ == '__main__':
     net = SfSNet(bn_affine=True)
     net.eval()
-    net.load_weights_from_pkl('wow/weights.pkl')
+    net.load_weights_from_pkl('SfSNet-Caffe/weights.pkl')
 
     mg = MaskGenerator(LANDMARK_PATH)
     image = cv2.imread('1.png_face.png')
