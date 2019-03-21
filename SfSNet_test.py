@@ -21,6 +21,13 @@ def weights_init(m):
         init.constant_(m.bias.data, 0.0)
 
 
+def save(path, arr):
+    if isinstance(arr, np.ndarray):
+        np.save(path+'.torch.npy', arr)
+    else:
+        np.save(path+'.torch.npy', arr.detach().numpy())
+
+
 if __name__ == '__main__':
     net = SfSNet(bn_affine=True)
     net.eval()
@@ -28,32 +35,38 @@ if __name__ == '__main__':
 
     mg = MaskGenerator(LANDMARK_PATH)
     image = cv2.imread('1.png_face.png')
-    mask = np.ones((M, M))
-    # mask, im = mg.align(image, crop_size=(M, M))
-    im = cv2.resize(image, (M, M))
+    mask, im = mg.align(image, crop_size=(M, M))
+    im = cv2.resize(im, (M, M))
     im = np.float32(im) / 255.0
     # im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     im = np.transpose(im, [2, 0, 1])  # from (128, 128, 3) to (1, 3, 128, 128)
     im = np.expand_dims(im, 0)
     print(np.min(im), np.max(im))
 
-    conv1 = net(torch.from_numpy(im))
-    npp = conv1.detach().numpy()
-    print(npp.shape)
-    print(npp[0, :, 0, 0])
-    duibi = np.load('data/data.npy')
-    indices = np.arange(0, 256, 1)
-    print(np.sum(np.abs(npp[:, indices, :, :]-duibi[:, indices, :, :])))
-    np.save('data/data1.npy', npp)
-    exit()
+    # conv1 = net(torch.from_numpy(im))
+
+    # print(conv1[2].detach().numpy())
+    # exit()
+
+    # np.save('data/nsum5.torch.npy', conv1[0].detach().numpy())
+    # np.save('data/asum5.torch.npy', conv1[1].detach().numpy())
+    # np.save('data/lconcat1.torch.npy', conv1[2].detach().numpy())
+    #
+    # exit()
+    #
+    # npp = conv1.detach().numpy()
+    # print(npp.shape)
+    # print(npp[0, :, 0, 0])
+    # duibi = np.load('data/data.npy')
+    # indices = np.arange(0, 256, 1)
+    # print(np.sum(np.abs(npp-duibi)))
+    # exit()
 
     normal, albedo, light = net(torch.from_numpy(im))
 
     n_out=normal.detach().numpy()
     al_out=albedo.detach().numpy()
     light_out = light.detach().numpy()
-
-    print(light_out)
 
     # -----------add by wang-------------
     # from [1, 3, 128, 128] to [128, 128, 3]
@@ -93,12 +106,18 @@ if __name__ == '__main__':
     # Note: n_out2, al_out2, light_out is the actual output
     Irec, Ishd = create_shading_recon(n_out2, al_out2, light_out)
 
-    # diff = (mask / 255)
+    diff = (mask // 255)
+    n_out2 = n_out2 * diff
+    al_out2 = al_out2 * diff
+    Ishd = Ishd * diff
+    Irec = Irec * diff
 
-    # n_out2 = n_out2 * diff
-    # al_out2 = al_out2 * diff
-    # Ishd = Ishd * diff
-    # Irec = Irec * diff
+    save('data/normal', n_out2)
+    save('data/albedo', al_out2)
+    save('data/light', light_out)
+    save('data/Irec', Irec)
+    save('data/Ishd', Ishd)
+    print(diff.dtype)
 
     # -----------add by wang------------
     Ishd = np.float32(Ishd)
@@ -120,3 +139,6 @@ if __name__ == '__main__':
     cv2.imshow("Shading", Ishd)
     cv2.waitKey(0)
 
+
+if __name__ == '__main__':
+    pass
