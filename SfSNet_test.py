@@ -29,9 +29,10 @@ def save(path, arr):
 
 
 if __name__ == '__main__':
-    net = SfSNet(bn_affine=True)
+    net = SfSNet()
     net.eval()
     net.load_weights_from_pkl('SfSNet-Caffe/weights.pkl')
+    exit()
 
     mg = MaskGenerator(LANDMARK_PATH)
     image = cv2.imread('1.png_face.png')
@@ -67,6 +68,8 @@ if __name__ == '__main__':
     n_out=normal.detach().numpy()
     al_out=albedo.detach().numpy()
     light_out = light.detach().numpy()
+
+    print(light_out)
 
     # -----------add by wang-------------
     # from [1, 3, 128, 128] to [128, 128, 3]
@@ -117,13 +120,10 @@ if __name__ == '__main__':
     save('data/light', light_out)
     save('data/Irec', Irec)
     save('data/Ishd', Ishd)
-    print(diff.dtype)
 
     # -----------add by wang------------
     Ishd = np.float32(Ishd)
     Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
-
-    print(np.min(al_out2))
 
     al_out2 = (al_out2 / np.max(al_out2) * 255).astype(dtype=np.uint8)
     Irec = (Irec / np.max(Irec) * 255).astype(dtype=np.uint8)

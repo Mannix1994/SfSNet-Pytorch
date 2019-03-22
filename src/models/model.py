@@ -174,7 +174,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             def _set_deconv(layer, key):
                 state_dict[layer+'.weight'] = from_numpy(name_weights[key]['weight'])
 
-            def _set_conv(layer, key):
+            def _set(layer, key):
                 state_dict[layer + '.weight'] = from_numpy(name_weights[key]['weight'])
                 state_dict[layer + '.bias'] = from_numpy(name_weights[key]['bias'])
 
@@ -186,15 +186,15 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
 
             def _set_res(layer, n_or_a, index):
                 _set_bn(layer+'.bn', n_or_a + 'bn' + str(index))
-                _set_conv(layer+'.conv', n_or_a + 'conv' + str(index))
+                _set(layer+'.conv', n_or_a + 'conv' + str(index))
                 _set_bn(layer+'.bnr', n_or_a + 'bn' + str(index) + 'r')
-                _set_conv(layer+'.convr', n_or_a + 'conv' + str(index) + 'r')
+                _set(layer+'.convr', n_or_a + 'conv' + str(index) + 'r')
 
-            _set_conv('conv1', 'conv1')
+            _set('conv1', 'conv1')
             _set_bn('bn1', 'bn1')
-            _set_conv('conv2', 'conv2')
+            _set('conv2', 'conv2')
             _set_bn('bn2', 'bn2')
-            _set_conv('conv3', 'conv3')
+            _set('conv3', 'conv3')
             _set_res('n_res1', 'n', 1)
             _set_res('n_res2', 'n', 2)
             _set_res('n_res3', 'n', 3)
@@ -202,11 +202,11 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_res('n_res5', 'n', 5)
             _set_bn('nbn6r', 'nbn6r')
             _set_deconv('nup6', 'nup6')
-            _set_conv('nconv6', 'nconv6')
+            _set('nconv6', 'nconv6')
             _set_bn('nbn6', 'nbn6')
-            _set_conv('nconv7', 'nconv7')
+            _set('nconv7', 'nconv7')
             _set_bn('nbn7', 'nbn7')
-            _set_conv('Nconv0', 'Nconv0')
+            _set('Nconv0', 'Nconv0')
             _set_res('a_res1', 'a', 1)
             _set_res('a_res2', 'a', 2)
             _set_res('a_res3', 'a', 3)
@@ -214,14 +214,14 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_res('a_res5', 'a', 5)
             _set_bn('abn6r', 'abn6r')
             _set_deconv('aup6', 'aup6')
-            _set_conv('aconv6', 'aconv6')
+            _set('aconv6', 'aconv6')
             _set_bn('abn6', 'abn6')
-            _set_conv('aconv7', 'aconv7')
+            _set('aconv7', 'aconv7')
             _set_bn('abn7', 'abn7')
-            _set_conv('Aconv0', 'Aconv0')
-            _set_conv('lconv1', 'lconv1')
+            _set('Aconv0', 'Aconv0')
+            _set('lconv1', 'lconv1')
             _set_bn('lbn1', 'lbn1')
-            _set_conv('fc_light', 'fc_light')
+            _set('fc_light', 'fc_light')
             self.load_state_dict(state_dict)
 
 
