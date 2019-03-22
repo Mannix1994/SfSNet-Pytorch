@@ -32,7 +32,6 @@ if __name__ == '__main__':
     net = SfSNet()
     net.eval()
     net.load_weights_from_pkl('SfSNet-Caffe/weights.pkl')
-    exit()
 
     mg = MaskGenerator(LANDMARK_PATH)
     image = cv2.imread('1.png_face.png')

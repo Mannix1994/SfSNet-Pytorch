@@ -17,6 +17,11 @@ class MaskGenerator:
         it could be download from:
         http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
         """
+        import os
+        if not os.path.exists(LANDMARK_PATH):
+            raise RuntimeError('face landmark file is not exist. please download if from: \n'
+                               'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 '
+                               'and uncompress it.')
         self._detector = dlib.get_frontal_face_detector()
         self._predictor = dlib.shape_predictor(landmarks_path)
 
