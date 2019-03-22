@@ -16,7 +16,8 @@ if __name__ == '__main__':
     # set to eval mode
     net.eval()
     # load weights
-    net.load_weights_from_pkl('SfSNet-Caffe/weights.pkl')
+    # net.load_weights_from_pkl('SfSNet-Caffe/weights.pkl')
+    net.load_state_dict(torch.load('data/SfSNet.pth'))
     # define a mask generator
     mg = MaskGenerator(LANDMARK_PATH)
 
