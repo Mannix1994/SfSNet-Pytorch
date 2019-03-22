@@ -168,7 +168,12 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
     def load_weights_from_pkl(self, weights_pkl):
         from torch import from_numpy
         with open(weights_pkl, 'rb') as wp:
-            name_weights = pkl.load(wp)
+            try:
+                # for python3
+                name_weights = pkl.load(wp, encoding='latin1')
+            except TypeError as e:
+                # for python2
+                name_weights = pkl.load(wp)
             state_dict = {}
 
             def _set_deconv(layer, key):

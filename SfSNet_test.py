@@ -21,7 +21,7 @@ if __name__ == '__main__':
     mg = MaskGenerator(LANDMARK_PATH)
 
     # get image list
-    image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.png'))
+    image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
 
     for image_name in image_list:
         # read image
