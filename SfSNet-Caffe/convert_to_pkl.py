@@ -3,10 +3,7 @@ from __future__ import absolute_import, division, print_function
 import pickle as pkl
 import caffe
 
-# prototxt文件
-MODEL_FILE = 'SfSNet_deploy.prototxt'
-# 预先训练好的caffe模型
-PRETRAIN_FILE = 'SfSNet.caffemodel.h5'
+
 
 
 if __name__ == '__main__':
