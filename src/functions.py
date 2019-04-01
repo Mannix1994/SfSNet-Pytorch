@@ -165,7 +165,7 @@ def inpolygon(xq, yq, xv, yv):
 
 
 def convert(src, dtype=np.uint8, max_value=255.0):
-    # type: (np.ndarray, np.dtype, float) -> np.ndarray
+    # type: (np.ndarray, object, float) -> np.ndarray
     # copy src
     dst = src.copy()
     # find min value
