@@ -6,11 +6,16 @@ import numpy as np
 import cv2
 import torch
 from config import M, LANDMARK_PATH, PROJECT_DIR
-from src.functions import create_shading_recon
+from src.functions import create_shading_recon, convert
 from src.mask import MaskGenerator
 from src.model import SfSNet
 
+
 if __name__ == '__main__':
+    pass
+
+
+def _test():
     # define a SfSNet
     net = SfSNet()
     # set to eval mode
@@ -90,7 +95,6 @@ if __name__ == '__main__':
         Irec = Irec * diff
 
         # -----------add by wang------------
-        Ishd = np.float32(Ishd)
         Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
 
         # al_out2 = (al_out2 / np.max(al_out2) * 255).astype(dtype=np.uint8)
@@ -106,9 +110,13 @@ if __name__ == '__main__':
         cv2.imshow("Albedo", al_out2)
         cv2.imshow("Recon", Irec)
         cv2.imshow("Shading", Ishd)
+
+        # save result
+        cv2.imwrite('shading.png', convert(Ishd))
         if cv2.waitKey(0) == 27:
             exit()
 
 
 if __name__ == '__main__':
+    _test()
     pass
