@@ -22,7 +22,7 @@ def create_shading_recon(n_out2, al_out2, light_out):
     HS1g = np.matmul(HN1, light_out[9:18])
     HS1b = np.matmul(HN1, light_out[18:27])
 
-    HS1 = np.zeros(shape=(M, M, 3))
+    HS1 = np.zeros(shape=(M, M, 3), dtype=np.float32)
     HS1[:, :, 0] = np.reshape(HS1r, (M, M))
     HS1[:, :, 1] = np.reshape(HS1g, (M, M))
     HS1[:, :, 2] = np.reshape(HS1b, (M, M))

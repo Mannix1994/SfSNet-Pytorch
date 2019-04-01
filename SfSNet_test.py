@@ -93,9 +93,9 @@ if __name__ == '__main__':
         Ishd = np.float32(Ishd)
         Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
 
-        al_out2 = (al_out2 / np.max(al_out2) * 255).astype(dtype=np.uint8)
-        Irec = (Irec / np.max(Irec) * 255).astype(dtype=np.uint8)
-        Ishd = (Ishd / np.max(Ishd) * 255).astype(dtype=np.uint8)
+        # al_out2 = (al_out2 / np.max(al_out2) * 255).astype(dtype=np.uint8)
+        # Irec = (Irec / np.max(Irec) * 255).astype(dtype=np.uint8)
+        # Ishd = (Ishd / np.max(Ishd) * 255).astype(dtype=np.uint8)
 
         al_out2 = cv2.cvtColor(al_out2, cv2.COLOR_RGB2BGR)
         n_out2 = cv2.cvtColor(n_out2, cv2.COLOR_RGB2BGR)
@@ -106,7 +106,8 @@ if __name__ == '__main__':
         cv2.imshow("Albedo", al_out2)
         cv2.imshow("Recon", Irec)
         cv2.imshow("Shading", Ishd)
-        cv2.waitKey(0)
+        if cv2.waitKey(0) == 27:
+            exit()
 
 
 if __name__ == '__main__':
