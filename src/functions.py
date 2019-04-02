@@ -163,15 +163,3 @@ def inpolygon(xq, yq, xv, yv):
     _on = _in ^ _in_on
     return _in_on, _on
 
-
-def convert(src, dtype=np.uint8, max_value=255.0):
-    # type: (np.ndarray, object, float) -> np.ndarray
-    # copy src
-    dst = src.copy()
-    # find min value
-    shift = np.min(src)
-    # add min value to dst
-    dst += shift
-    # scale to (0, scale)
-    dst *= (max_value / np.max(src))
-    return dst.astype(dtype)

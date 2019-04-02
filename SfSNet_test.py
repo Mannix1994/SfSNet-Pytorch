@@ -6,9 +6,10 @@ import numpy as np
 import cv2
 import torch
 from config import M, LANDMARK_PATH, PROJECT_DIR
-from src.functions import create_shading_recon, convert
+from src.functions import create_shading_recon
 from src.mask import MaskGenerator
 from src.model import SfSNet
+from src.utils import convert
 
 
 if __name__ == '__main__':
@@ -113,6 +114,7 @@ def _test():
 
         # save result
         cv2.imwrite('shading.png', convert(Ishd))
+        cv2.imwrite('Albedo.png', convert(al_out2))
         if cv2.waitKey(0) == 27:
             exit()
 
