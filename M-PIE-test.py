@@ -8,6 +8,7 @@ import torch
 from config import M, LANDMARK_PATH, PROJECT_DIR
 from src.functions import create_shading_recon
 from src.model import SfSNet
+from src.utils import convert
 
 M_PIE_DIR = '/home/creator/Projects/DL/MVCNN-keras-Face-Yale/data/M-PIE/train/001/*.png'
 
@@ -120,6 +121,10 @@ if __name__ == '__main__':
         cv2.imshow("Albedo", al_out2)
         cv2.imshow("Recon", Irec)
         cv2.imshow("Shading", Ishd)
+
+        cv2.imwrite('result/shading/'+image_name.split('/')[-1], convert(Ishd))
+        # cv2.imwrite('result/Albedo/'+image_name.split('/')[-1], convert(al_out2))
+        # cv2.imwrite('result/Irec/'+image_name.split('/')[-1], convert(Irec))
         if cv2.waitKey(0) == 27:
             exit()
 
