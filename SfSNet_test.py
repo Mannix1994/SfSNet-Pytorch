@@ -6,9 +6,9 @@ import numpy as np
 import cv2
 import torch
 from config import M, LANDMARK_PATH, PROJECT_DIR
-from src.functions import create_shading_recon, convert
-from src.mask import MaskGenerator
-from src.model import SfSNet
+from src import create_shading_recon, convert
+from src import MaskGenerator
+from src import SfSNet
 
 if __name__ == '__main__':
     # define a SfSNet
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         cv2.imshow("Recon", Irec)
         cv2.imshow("Shading", Ishd)
 
-        cv2.imwrite('shading', convert(Ishd))
+        cv2.imwrite('shading.png', convert(Irec))
         if cv2.waitKey(0) == 27:
             exit()
 

@@ -5,10 +5,10 @@ import os
 import numpy as np
 import cv2
 import torch
-from config import M, LANDMARK_PATH, PROJECT_DIR
-from src.functions import create_shading_recon
-from src.model import SfSNet
-from src.utils import convert
+from config import M, PROJECT_DIR
+from src import create_shading_recon
+from src import SfSNet
+from src import convert
 
 M_PIE_DIR = '/home/creator/Projects/DL/MVCNN-keras-Face-Yale/data/M-PIE/train/001/*.png'
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     net.eval()
     # load weights
     # net.load_weights_from_pkl('SfSNet-Caffe/weights.pkl')
-    net.load_state_dict(torch.load('data/SfSNet.pth'))
+    net.load_state_dict(torch.load(os.path.join(PROJECT_DIR, 'data/SfSNet.pth')))
     # define a mask generator
     mg = MaskGenerator()
 
@@ -41,6 +41,7 @@ if __name__ == '__main__':
     for image_name in image_list:
         # read image
         image = cv2.imread(image_name)
+        assert image.ndim == 3
         # crop face and generate mask of face
         mask, im = mg.align(image, crop_size=(M, M))
         cv2.imshow('mask', mask*255)
@@ -125,7 +126,7 @@ if __name__ == '__main__':
         cv2.imwrite('result/shading/'+image_name.split('/')[-1], convert(Ishd))
         cv2.imwrite('result/Albedo/'+image_name.split('/')[-1], convert(al_out2))
         cv2.imwrite('result/Irec/'+image_name.split('/')[-1], convert(Irec))
-        if cv2.waitKey(0) == 27:
+        if cv2.waitKey(10) == 27:
             exit()
 
 
