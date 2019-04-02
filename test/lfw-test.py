@@ -11,25 +11,42 @@ from src import SfSNet
 from src import convert
 import shutil
 
-M_PIE_DIR = '/home/creator/Projects/DL/MVCNN-keras-Face-Yale/data/M-PIE/train/001/*.png'
+LFW_DIR = '/home/creator/E/wangmz/Ubuntu/lfw-align-128'
 
 
 shutil.rmtree(os.path.join(PROJECT_DIR, 'result'), ignore_errors=True)
 os.makedirs(os.path.join(PROJECT_DIR, 'result', 'Albedo'))
 os.makedirs(os.path.join(PROJECT_DIR, 'result', 'shading'))
 os.makedirs(os.path.join(PROJECT_DIR, 'result', 'Irec'))
-
+os.makedirs(os.path.join(PROJECT_DIR, 'result', 'Image'))
 
 
 class MaskGenerator(object):
     def __init__(self):
         super(MaskGenerator, self).__init__()
 
-    def align(self,  image, crop_size=(128, 128), scale=3.5):
-        image = cv2.copyMakeBorder(image, 70, 70, 70, 70, cv2.BORDER_CONSTANT)
+    def align(self,  image, crop_size=(128, 128), border=30):
+        mask = np.ones(image.shape, np.uint8)*255
+        mask = cv2.copyMakeBorder(mask, border, border, border, border, cv2.BORDER_CONSTANT)
+        image = cv2.copyMakeBorder(image, border, border, border, border, cv2.BORDER_CONSTANT)
         image = cv2.resize(image, crop_size)
-        mask = np.ones(image.shape, dtype=np.uint8)*255
+        mask = cv2.resize(mask, crop_size)
         return mask, image
+
+
+def lfw_list(m_dir):
+    from os.path import join
+    person_dirs = os.listdir(m_dir)
+    person_dirs = [join(m_dir, d) for d in person_dirs]
+    images_path = []
+    for p_d in person_dirs:
+        images = os.listdir(p_d)
+        images = [join(p_d, i) for i in images]
+        images_path.extend(images)
+    # print(person_dirs)
+    # print(images_path)
+    # exit()
+    return images_path
 
 
 if __name__ == '__main__':
@@ -44,7 +61,7 @@ if __name__ == '__main__':
     mg = MaskGenerator()
 
     # get image list
-    image_list = glob.glob(M_PIE_DIR)
+    image_list = lfw_list(LFW_DIR)[0:20]
 
     for image_name in image_list:
         # read image
@@ -52,8 +69,9 @@ if __name__ == '__main__':
         assert image.ndim == 3
         # crop face and generate mask of face
         mask, im = mg.align(image, crop_size=(M, M))
-        cv2.imshow('mask', mask*255)
+        # cv2.imshow('mask', mask)
         cv2.imshow('image', im)
+        cv2.imwrite('../result/Image/' + image_name.split('/')[-1], im)
         # exit()
         # resize
         im = cv2.resize(im, (M, M))
@@ -126,14 +144,14 @@ if __name__ == '__main__':
         Irec = cv2.cvtColor(Irec, cv2.COLOR_RGB2BGR)
         # -------------end---------------------
 
-        cv2.imshow("Normal", n_out2)
+        # cv2.imshow("Normal", n_out2)
         cv2.imshow("Albedo", al_out2)
-        cv2.imshow("Recon", Irec)
+        # cv2.imshow("Recon", Irec)
         cv2.imshow("Shading", Ishd)
 
-        cv2.imwrite('result/shading/'+image_name.split('/')[-1], convert(Ishd))
-        cv2.imwrite('result/Albedo/'+image_name.split('/')[-1], convert(al_out2))
-        cv2.imwrite('result/Irec/'+image_name.split('/')[-1], convert(Irec))
+        cv2.imwrite('../result/shading/'+image_name.split('/')[-1], convert(Ishd))
+        cv2.imwrite('../result/Albedo/'+image_name.split('/')[-1], convert(al_out2))
+        cv2.imwrite('../result/Irec/'+image_name.split('/')[-1], convert(Irec))
         if cv2.waitKey(10) == 27:
             exit()
 

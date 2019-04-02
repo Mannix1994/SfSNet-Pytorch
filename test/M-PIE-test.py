@@ -23,10 +23,12 @@ class MaskGenerator(object):
     def __init__(self):
         super(MaskGenerator, self).__init__()
 
-    def align(self,  image, crop_size=(128, 128), scale=3.5):
-        image = cv2.copyMakeBorder(image, 70, 70, 70, 70, cv2.BORDER_CONSTANT)
+    def align(self,  image, crop_size=(128, 128), border=40):
+        mask = np.ones(image.shape, np.uint8)*255
+        mask = cv2.copyMakeBorder(mask, border, border, border, border, cv2.BORDER_CONSTANT)
+        image = cv2.copyMakeBorder(image, border, border, border, border, cv2.BORDER_CONSTANT)
         image = cv2.resize(image, crop_size)
-        mask = np.ones(image.shape, dtype=np.uint8)*255
+        mask = cv2.resize(mask, crop_size)
         return mask, image
 
 
@@ -50,7 +52,7 @@ if __name__ == '__main__':
         assert image.ndim == 3
         # crop face and generate mask of face
         mask, im = mg.align(image, crop_size=(M, M))
-        cv2.imshow('mask', mask*255)
+        cv2.imshow('mask', mask)
         cv2.imshow('image', im)
         # exit()
         # resize
@@ -132,7 +134,7 @@ if __name__ == '__main__':
         cv2.imwrite('result/shading/'+image_name.split('/')[-1], convert(Ishd))
         cv2.imwrite('result/Albedo/'+image_name.split('/')[-1], convert(al_out2))
         cv2.imwrite('result/Irec/'+image_name.split('/')[-1], convert(Irec))
-        if cv2.waitKey(10) == 27:
+        if cv2.waitKey(0) == 27:
             exit()
 
 
