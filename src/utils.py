@@ -9,7 +9,7 @@ def _convert(src, max_value):
     _min = np.min(src)
     _max = np.max(src)
     # scale to (0, max_value)
-    dst = (src - _min) / (_max - _min)
+    dst = (src - _min) / (_max - _min + 1e-10)
     dst *= max_value
     return dst
 
