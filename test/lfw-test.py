@@ -13,10 +13,12 @@ import shutil
 
 M_PIE_DIR = '/home/creator/Projects/DL/MVCNN-keras-Face-Yale/data/M-PIE/train/001/*.png'
 
+
 shutil.rmtree(os.path.join(PROJECT_DIR, 'result'), ignore_errors=True)
 os.makedirs(os.path.join(PROJECT_DIR, 'result', 'Albedo'))
 os.makedirs(os.path.join(PROJECT_DIR, 'result', 'shading'))
 os.makedirs(os.path.join(PROJECT_DIR, 'result', 'Irec'))
+
 
 
 class MaskGenerator(object):
