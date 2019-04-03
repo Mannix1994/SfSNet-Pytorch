@@ -56,15 +56,15 @@ class L2LossLayerWt(Module):
         self._wt_real = wt_real
         self._wt_syn = wt_syn
 
-    def forward(self, fc_light, label, label3):
+    def forward(self, fc_light, fc_light_gt, label3):
         # type: (torch.Tensor, torch.Tensor, torch.Tensor) -> torch.Tensor
         """
         :param fc_light: fc_light
-        :param label:
+        :param fc_light_gt:
         :param label3: flag for which data is synthetic
         :return: loss, a scalar
         """
-        diff = (fc_light - label)**2
+        diff = (fc_light - fc_light_gt) ** 2
 
         tmp_sum = torch.sum(diff, dim=(1, ))
 

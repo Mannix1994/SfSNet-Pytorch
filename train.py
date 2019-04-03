@@ -61,7 +61,7 @@ def train():
             # -------------aloss----------
             mask_al = Acov0 * mask
             mask_algt = albedo * mask
-            aloss = l1_layer(mask_al, mask_algt)
+            aloss = l1_layer(mask_al, mask_algt, label)
             # -----------loss--------------
             mask_nor = Nconv0 * mask
             mask_norgt = normal * mask

@@ -48,7 +48,7 @@ class SfSNetDataset(Dataset):
         face = self.__transform(record[2])
         normal = self.__transform(record[4])
         mask = self.__transform(record[5])
-        fc_light = np.array(np.loadtxt(join(self.__dataset_dir, record[3])))
+        fc_light = np.array(np.loadtxt(join(self.__dataset_dir, record[3])), dtype=np.float32)
         return from_numpy(face), from_numpy(mask), from_numpy(normal), \
                from_numpy(albedo), from_numpy(fc_light), \
                from_numpy(np.array([record[6], ], dtype=np.float32))
