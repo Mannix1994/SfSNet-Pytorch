@@ -48,10 +48,13 @@ class NormLayer(Module):
 
 
 class ShadingLayer(Module):
-    def __init__(self):
+    def __init__(self, gpu):
         super(ShadingLayer, self).__init__()
+        self.__gpu = gpu
         self.att = np.pi * np.array([1, 2.0 / 3, 0.25], dtype=np.float32)
         self.att = torch.from_numpy(self.att)
+        if self.__gpu:
+            self.att = self.att.cuda()
         self.c1 = self.att[0] * (1.0 / np.sqrt(4 * np.pi))
         self.c2 = self.att[1] * (np.sqrt(3.0 / (4 * np.pi)))
         self.c3 = self.att[2] * 0.5 * (np.sqrt(5.0 / (4 * np.pi)))
@@ -66,8 +69,10 @@ class ShadingLayer(Module):
             nx = recnormalch[i, 0, ...]
             ny = recnormalch[i, 1, ...]
             nz = recnormalch[i, 2, ...]
-
-            H1 = self.c1 * torch.ones((sz[2], sz[3]), dtype=torch.float32)
+            if self.__gpu:
+                H1 = self.c1 * torch.ones((sz[2], sz[3]), dtype=torch.float32).cuda()
+            else:
+                H1 = self.c1 * torch.ones((sz[2], sz[3]), dtype=torch.float32)
             H2 = self.c2 * nz
             H3 = self.c2 * nx
             H4 = self.c2 * ny
@@ -93,15 +98,15 @@ class ShadingLayer(Module):
             ny = recnormalch[i, 1, ...]
             nz = recnormalch[i, 2, ...]
 
-            H1 = self.c1.numpy() * np.ones((sz[2], sz[3]), dtype=np.float32)
-            H2 = self.c2.numpy() * nz
-            H3 = self.c2.numpy() * nx
-            H4 = self.c2.numpy() * ny
-            H5 = self.c3.numpy() * (2 * nz * nz - nx * nx - ny * ny)
-            H6 = self.c4.numpy() * nx * nz
-            H7 = self.c4.numpy() * ny * nz
-            H8 = self.c5.numpy() * (nx * nx - ny * ny)
-            H9 = self.c4.numpy() * nx * ny
+            H1 = self.c1.cpu().numpy() * np.ones((sz[2], sz[3]), dtype=np.float32)
+            H2 = self.c2.cpu().numpy() * nz
+            H3 = self.c2.cpu().numpy() * nx
+            H4 = self.c2.cpu().numpy() * ny
+            H5 = self.c3.cpu().numpy() * (2 * nz * nz - nx * nx - ny * ny)
+            H6 = self.c4.cpu().numpy() * nx * nz
+            H7 = self.c4.cpu().numpy() * ny * nz
+            H8 = self.c5.cpu().numpy() * (nx * nx - ny * ny)
+            H9 = self.c4.cpu().numpy() * nx * ny
 
             for j in range(0, 3):
                 L = fc_light[i, j * 9:(j + 1) * 9]
@@ -119,8 +124,13 @@ if __name__ == '__main__':
     print(np.sum(np.abs(nl(t_a).numpy() - nl.numpy(a))))
     print(np.sum(np.abs(cfm(t_a).numpy() - cfm.numpy(a))))
 
-    sl = ShadingLayer()
+    # test cpu
+    sl = ShadingLayer(False)
     normal = np.random.randn(16, 3, 128, 128).astype(np.float32)
     fc_lig = np.random.randn(16, 27).astype(np.float32)
     print(np.sum(np.abs(sl(torch.from_numpy(normal), torch.from_numpy(fc_lig)).numpy()
                         - sl.numpy(normal, fc_lig))))
+    # test gpu
+    sl2 = ShadingLayer(True)
+    print(np.sum(np.abs(sl2(torch.from_numpy(normal).cuda(), torch.from_numpy(fc_lig).cuda()).cpu().numpy()
+                        - sl2.numpy(normal, fc_lig))))

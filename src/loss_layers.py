@@ -24,14 +24,13 @@ class L1LossLayerWt(Module):
 
         tmp_sum = torch.sum(diff, dim=(1, 2, 3))  # only keep dim 0(batch size dimension)
 
-        new_label = torch.zeros_like(label)
+        new_label = torch.zeros_like(label, )
 
         for i in range(label.size()[0]):
             if label[i] > 0:
                 new_label[i] = self._wt_real
             else:
                 new_label[i] = self._wt_syn
-
         loss = torch.sum((tmp_sum*new_label))
         loss /= recon.size()[0]
         return loss
@@ -96,18 +95,26 @@ class L2LossLayerWt(Module):
 
 
 if __name__ == '__main__':
+    from torch import from_numpy as fn
     l1_loss = L1LossLayerWt(0.6, 0.4)
     recon_ = np.random.randn(16, 3, 128, 128).astype(dtype=np.float32)
     recon_m = np.random.randn(16, 3, 128, 128).astype(dtype=np.float32)
     label = np.random.randint(0, 2, (16, )).astype(dtype=np.float32)
-    t_out = l1_loss(torch.from_numpy(recon_), torch.from_numpy(recon_m), torch.from_numpy(label))
     n_out = l1_loss.numpy(recon_, recon_m, label)
+    # test cpu
+    t_out = l1_loss(fn(recon_), fn(recon_m), fn(label))
     print(np.sum(np.abs(t_out.numpy() - n_out)))
+    # test gpu
+    t_out = l1_loss(fn(recon_).cuda(), fn(recon_m).cuda(), fn(label).cuda())
+    print(np.sum(np.abs(t_out.cpu().numpy() - n_out)))
 
     fc_lig = np.random.randn(16, 27).astype(dtype=np.float32)
     fc_lig_label = np.random.randn(16, 27).astype(dtype=np.float32)
     l2_loss = L2LossLayerWt(0.4, 0.6)
-    t_out = l2_loss(torch.from_numpy(fc_lig), torch.from_numpy(fc_lig_label), torch.from_numpy(label))
     n_out = l2_loss.numpy(fc_lig, fc_lig_label, label)
+    # test cpu
+    t_out = l2_loss(fn(fc_lig), fn(fc_lig_label), fn(label))
     print(np.sum(np.abs(t_out.numpy() - n_out)))
-
+    # test gpu
+    t_out = l2_loss(fn(fc_lig).cuda(), fn(fc_lig_label).cuda(), fn(label).cuda())
+    print(np.sum(np.abs(t_out.cpu().numpy() - n_out)))
