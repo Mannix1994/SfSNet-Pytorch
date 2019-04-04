@@ -28,6 +28,8 @@ class ResidualBlock(nn.Module):
 
 class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
     def __init__(self):
+        # 是否使用cuda的标志
+        self.is_cuda = True
         # C64
         super(SfSNet, self).__init__()
         # TODO 初始化器 xavier
@@ -228,6 +230,16 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             _set_bn('lbn1', 'lbn1')
             _set('fc_light', 'fc_light')
             self.load_state_dict(state_dict)
+
+    def cuda(self, device=None):
+        super(SfSNet, self).cuda(device)
+        self.is_cuda = True
+        return self
+
+    def cpu(self):
+        super(SfSNet, self).cpu()
+        self.is_cuda = False
+        return self
 
 
 if __name__ == '__main__':

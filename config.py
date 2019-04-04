@@ -10,4 +10,4 @@ M = 128  # size of input for SfSNet
 LANDMARK_PATH = os.path.join(PROJECT_DIR, 'data/shape_predictor_68_face_landmarks.dat')
 
 # SfSNet dataset directory
-SFSNET_DATASET_DIR = '/home/creator/E/wangmz/Ubuntu/DATA_pose_15'
+SFSNET_DATASET_DIR = '/home/creator/Data/DATA_pose_15'
