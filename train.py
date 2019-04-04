@@ -25,7 +25,7 @@ def train():
     dloader = DataLoader(train_dset, batch_size=32, shuffle=True, num_workers=16)
 
     # define optimizer
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
