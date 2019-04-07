@@ -10,6 +10,10 @@ import numpy as np
 
 if __name__ == '__main__':
     pass
+    # model = SfSNet()
+    # with open('data/temp1.pth', 'r') as f:
+    #     model.load_state_dict(torch.load(f))
+    # exit()
 
 
 def train():
@@ -107,8 +111,9 @@ def train():
         print("用户主动退出...")
         pass
     finally:
-        with open('data/temp.pth', 'w') as f:
-            torch.save(model.state_dict(), f)
+        import time
+        with open('data/temp_%s.pth' % time.time(), 'w') as f:
+            torch.save(model.module.state_dict(), f)
 
 
 if __name__ == '__main__':
