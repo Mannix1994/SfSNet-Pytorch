@@ -13,39 +13,58 @@ if __name__ == '__main__':
 
 
 def train():
+    batch_size = 32
     # define net
-    net = SfSNet().cuda()
+    model = SfSNet()
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        # dim = 0 [62, ...] -> [32, ...], [32, ...] on 2 GPUs
+        model = torch.nn.DataParallel(model).cuda()
+        # set batch size to 64
+        batch_size = 64
+    if torch.cuda.is_available():
+        model = model.cuda()
+
     # set to train mode
-    net.train()
+    model.train()
 
     # define dataset
     train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
 
     # define dataloader
-    dloader = DataLoader(train_dset, batch_size=32, shuffle=True, num_workers=16)
+    dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=16)
 
     # define optimizer
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    lr_sch = torch.optim.lr_scheduler.StepLR(optimizer, 1, 0.1)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
     normal_layer = NormLayer()
     change_form_layer = ChangeFormLayer()
-    shading_layer = ShadingLayer(gpu=net.is_cuda)
+    if torch.cuda.is_available():
+        shading_layer = ShadingLayer(gpu=True)
+    else:
+        shading_layer = ShadingLayer(gpu=False)
 
     try:
         for epoch in range(1000):
             # fc_light_gt = label
             # label3 = label1 = label2
+            lr_sch.step(epoch)
+            print('*' * 100)
+            print("epoch: ", epoch)
             for step, (data, mask, normal, albedo, fc_light_gt, label) in enumerate(dloader):
-                data = data.cuda()
-                mask = mask.cuda()
-                normal = normal.cuda()
-                albedo = albedo.cuda()
-                fc_light_gt = fc_light_gt.cuda()
-                label = label.cuda()
+                if torch.cuda.is_available():
+                    data = data.cuda()
+                    mask = mask.cuda()
+                    normal = normal.cuda()
+                    albedo = albedo.cuda()
+                    fc_light_gt = fc_light_gt.cuda()
+                    label = label.cuda()
                 # forward net
-                Nconv0, Acov0, fc_light = net(data)
+                Nconv0, Acov0, fc_light = model(data)
                 # ---------compute reconloss------------
                 # normalize
                 normalize = normal_layer(Nconv0)
@@ -89,7 +108,7 @@ def train():
         pass
     finally:
         with open('data/temp.pth', 'w') as f:
-            torch.save(net.state_dict(), f)
+            torch.save(model.state_dict(), f)
 
 
 if __name__ == '__main__':

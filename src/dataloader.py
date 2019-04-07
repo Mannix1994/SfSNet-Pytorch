@@ -70,4 +70,5 @@ def prepare_dataset(dataset_dir, size=128):
 
 
 if __name__ == '__main__':
-    train_dset, test_dset = prepare_dataset('/home/creator/E/wangmz/Ubuntu/DATA_pose_15')
+    train_dset, test_dset = prepare_dataset('/home/creator/Data/DATA_pose_15')
+    print(len(train_dset), len(test_dset))
