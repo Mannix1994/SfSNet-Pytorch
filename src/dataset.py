@@ -80,7 +80,7 @@ class PreprocessDataset(SfSNetDataset):
 
     def __getitem__(self, item):
         record = self._records[item]
-        print(record)
+        print(item, record['face'])
         albedo = self._transform(record['albedo'])
         face = self._transform(record['face'])
         normal = self._transform(record['normal'])
@@ -139,6 +139,7 @@ if __name__ == '__main__':
     train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
     print(len(train_dset), len(test_dset))
 
-    train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR_NPY)
+    train_dset, test_dset = prepare_processed_dataset(SFSNET_DATASET_DIR_NPY)
     print(len(train_dset), len(test_dset))
+
 
