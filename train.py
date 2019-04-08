@@ -21,8 +21,8 @@ def train():
     # define net
     model = SfSNet()
     # load last trained weight
-    with open('data/temp_1554642854.75.pth', 'r') as f:
-        model.load_state_dict(torch.load(f))
+    # with open('data/temp_2019.04.08_14.56.51.pth', 'r') as f:
+    #     model.load_state_dict(torch.load(f))
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         # dim = 0 [62, ...] -> [32, ...], [32, ...] on 2 GPUs
@@ -43,9 +43,10 @@ def train():
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=16)
 
     # define optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
 
-    lr_sch = torch.optim.lr_scheduler.StepLR(optimizer, 500, 0.1)
+    # learning rate scheduler
+    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[1000, 2000, 3000], gamma=0.1)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
@@ -56,14 +57,15 @@ def train():
     else:
         shading_layer = ShadingLayer(gpu=False)
 
+    step_size = len(train_dset)/batch_size
     try:
-        for epoch in range(1000):
+        for epoch in range(500):
             # fc_light_gt = label
             # label3 = label1 = label2
             print('*' * 100)
             print("epoch: ", epoch)
             for step, (data, mask, normal, albedo, fc_light_gt, label) in enumerate(dloader):
-                lr_sch.step(int(epoch*len(train_dset)/batch_size+step))
+                lr_sch.step(epoch * step_size + step)
                 if torch.cuda.is_available():
                     data = data.cuda()
                     mask = mask.cuda()
@@ -114,9 +116,13 @@ def train():
     except KeyboardInterrupt as e:
         print("用户主动退出...")
         pass
+    except:
+        print("其它异常...")
+        raise
     finally:
         import time
-        with open('data/temp_%s.pth' % time.time(), 'w') as f:
+        t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
+        with open('data/temp_%s.pth' % t, 'w') as f:
             torch.save(model.module.state_dict(), f)
 
 
