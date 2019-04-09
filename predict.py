@@ -53,7 +53,7 @@ class SfSNetEval:
         im = np.transpose(im, [2, 1, 0])
         im = np.expand_dims(im, 0)
 
-        mask = np.float32(mask) / 255.0
+        mask = mask // 255
 
         im = torch.from_numpy(im)
         if torch.cuda.is_available():
@@ -105,13 +105,13 @@ if __name__ == '__main__':
     image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
 
     # define sfsnet tool
-    ss = SfSNetEval('data/temp_2019.04.09_19.51.44.pth', LANDMARK_PATH)
+    ss = SfSNetEval('data/temp_2019.04.09_23.49.41.pth', LANDMARK_PATH)
 
     for image_name in image_list:
         # read image
         image = cv2.imread(image_name)
         # crop face and generate mask of face
-        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, True)
+        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, False)
 
         cv2.imshow("image", o_im)
         cv2.imshow("Normal", n_out2)

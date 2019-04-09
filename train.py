@@ -39,8 +39,8 @@ def train():
     # init weights
     model.apply(weight_init)
     # load last trained weight
-    with open('data/temp_2019.04.09_19.51.44.pth', 'r') as f:
-        model.load_state_dict(torch.load(f))
+    # with open('data/temp_2019.04.09_23.48.35.pth', 'r') as f:
+    #     model.load_state_dict(torch.load(f))
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         # dim = 0 [62, ...] -> [32, ...], [32, ...] on 2 GPUs
@@ -83,7 +83,7 @@ def train():
         for epoch in range(500):
             # fc_light_gt = label
             # label3 = label1 = label2
-            print('*' * 100)
+            print('*' * 80)
             print("epoch: ", epoch)
             for step, (data, mask, normal, albedo, fc_light_gt, label) in enumerate(dloader):
                 lr_sch.step(epoch * step_size + step)
@@ -149,7 +149,7 @@ def train():
         sta.save()
         t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
         with open('data/temp_%s.pth' % t, 'w') as f:
-            torch.save(model.module.state_dict(), f)
+            torch.save(model.module.cpu().state_dict(), f)
 
 
 if __name__ == '__main__':
