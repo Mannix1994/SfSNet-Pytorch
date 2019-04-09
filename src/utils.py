@@ -47,6 +47,7 @@ class Statistic:
             self.__csv_file = open(csv_name, 'wb')
             self.__csv_writer = csv.writer(self.__csv_file)
             self.__csv_writer.writerow(self.__keys)
+            self.__step = 0
         else:
             # 记录（一行是一条记录）
             self.__records = []
@@ -57,6 +58,11 @@ class Statistic:
             warnings.warn('the length of values is not equal with keys')
         if self.__auto_save:
             self.__csv_writer.writerow(values)
+            self.__step += 1
+            # 每调用add10次flush一次，保证效率以及减少数据丢失
+            if self.__step == 10:
+                self.__csv_file.flush()
+                self.__step = 0
         else:
             self.__records.append(values)
 
