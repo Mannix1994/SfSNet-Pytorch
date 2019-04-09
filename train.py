@@ -39,8 +39,8 @@ def train():
     # init weights
     model.apply(weight_init)
     # load last trained weight
-    # with open('data/temp_2019.04.08_14.56.51.pth', 'r') as f:
-    #     model.load_state_dict(torch.load(f))
+    with open('data/temp_2019.04.09_19.51.44.pth', 'r') as f:
+        model.load_state_dict(torch.load(f))
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         # dim = 0 [62, ...] -> [32, ...], [32, ...] on 2 GPUs
@@ -98,32 +98,32 @@ def train():
                 Nconv0, Acov0, fc_light = model(data)
                 # ---------compute reconloss------------
                 # normalize
-                normalize = normal_layer(Nconv0)
+                recnormal = normal_layer(Nconv0)
                 # change channel of normal
-                norch1 = change_form_layer(normalize)
+                recnormalch = change_form_layer(recnormal)
                 # compute shading
-                shading = shading_layer(norch1, fc_light)
+                shading = shading_layer(recnormalch, fc_light)
                 # change channel od albedo
-                albech2 = change_form_layer(Acov0)
+                albedoch = change_form_layer(Acov0)
                 # get recon images
-                recon = albech2 * shading
+                recon = albedoch * shading
                 # change channel format
-                maskch4 = change_form_layer(mask)
+                maskch = change_form_layer(mask)
                 # compute mask with recon
-                mask_recon = recon * maskch4
+                mask_recon = recon * maskch
 
-                datach3 = change_form_layer(data)
-                mask_data = datach3 * maskch4
+                datach = change_form_layer(data)
+                mask_data = datach * maskch
 
                 reconloss = l1_layer(mask_recon, mask_data, label)
                 # -------------aloss----------
-                mask_al = Acov0 * mask
-                mask_algt = albedo * mask
-                aloss = l1_layer(mask_al, mask_algt, label)
+                arec = Acov0 * mask
+                albedo_m = albedo * mask
+                aloss = l1_layer(arec, albedo_m, label)
                 # -----------loss--------------
-                mask_nor = Nconv0 * mask
-                mask_norgt = normal * mask
-                loss = l1_layer(mask_nor, mask_norgt, label)
+                nrec = Nconv0 * mask
+                normal_m = normal * mask
+                loss = l1_layer(nrec, normal_m, label)
                 # ------------
                 lloss = l2_layer(fc_light, fc_light_gt, label)
 

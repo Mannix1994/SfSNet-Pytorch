@@ -44,6 +44,7 @@ class SfSNetEval:
             raise RuntimeError('image is not a str or numpy array')
         # crop face and generate mask of face
         mask, im = self.mg.align(image, crop_size=(M, M))
+        o_im = im.copy()
         # resize
         im = cv2.resize(im, (M, M))
         # normalize to (0, 1.0)
@@ -57,7 +58,7 @@ class SfSNetEval:
         im = torch.from_numpy(im)
         if torch.cuda.is_available():
             im = im.cuda()
-        return mask, im
+        return mask, im, o_im
 
     @staticmethod
     def _get_numpy(tensor):
@@ -68,7 +69,7 @@ class SfSNetEval:
 
     def predict(self, image, with_mask=False):
         # compute mask and image
-        mask, im = self._read_image(image)
+        mask, im, o_im = self._read_image(image)
         # forward net
         Nconv0, Acov0, fc_light = self.net(im)
 
@@ -94,9 +95,9 @@ class SfSNetEval:
         # -------------end---------------------
 
         if not with_mask:
-            return Irec, n_out2, al_out2, Ishd
+            return o_im, Irec, n_out2, al_out2, Ishd
         else:
-            return Irec * mask, n_out2 * mask, al_out2 * mask, Ishd * mask
+            return o_im * mask, Irec * mask, n_out2 * mask, al_out2 * mask, Ishd * mask[..., 0]
 
 
 if __name__ == '__main__':
@@ -110,9 +111,9 @@ if __name__ == '__main__':
         # read image
         image = cv2.imread(image_name)
         # crop face and generate mask of face
-        Irec, n_out2, al_out2, Ishd = ss.predict(image)
+        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, True)
 
-        cv2.imshow("image", image)
+        cv2.imshow("image", o_im)
         cv2.imshow("Normal", n_out2)
         cv2.imshow("Albedo", al_out2)
         cv2.imshow("Recon", Irec)

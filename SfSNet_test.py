@@ -29,6 +29,8 @@ if __name__ == '__main__':
         image = cv2.imread(image_name)
         # crop face and generate mask of face
         mask, im = mg.align(image, crop_size=(M, M))
+        mask = mask // 255
+        cv2.imshow('image', im*mask)
         # resize
         im = cv2.resize(im, (M, M))
         # normalize to (0, 1.0)
@@ -84,11 +86,10 @@ if __name__ == '__main__':
         Irec, Ishd = create_shading_recon(n_out2, al_out2, light_out)
         # print(Irec.dtype, Ishd.dtype)
 
-        diff = (mask // 255)
-        n_out2 = n_out2 * diff
-        al_out2 = al_out2 * diff
-        Ishd = Ishd * diff
-        Irec = Irec * diff
+        n_out2 = n_out2 * mask
+        al_out2 = al_out2 * mask
+        Ishd = Ishd * mask
+        Irec = Irec * mask
 
         # -----------add by wang------------
         Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
