@@ -110,7 +110,7 @@ def train():
                 # change channel format
                 maskch4 = change_form_layer(mask)
                 # compute mask with recon
-                mask_recon = recon * mask
+                mask_recon = recon * maskch4
 
                 datach3 = change_form_layer(data)
                 mask_data = datach3 * maskch4

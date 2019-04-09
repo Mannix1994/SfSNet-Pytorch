@@ -12,7 +12,7 @@ If there are any bugs, please open a issue.
 # Dependencies
 * Python libs in requirements.txt
 
-# Test
+# SfSNet_test.py
 * Download shape_predictor_68_face_landmarks.dat from:
 http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 , 
 and uncompress it to project_dir/data.
@@ -51,3 +51,10 @@ config.py to your directory.
     ```
     if you press CTRL+C, the weights of current model will be 
     saved to ./data.
+    
+# Predict
+
+* Put your image in directory `Images`, then
+    ```bash
+    python predict.py
+    ```
