@@ -54,7 +54,9 @@ def train():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
 
     # learning rate scheduler
-    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3000, 8000, 11000], gamma=0.1)
+    # lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3000, 8000, 11000], gamma=0.1)
+    # lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=30, verbose=True)
+    lr_sch = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 5000, 1e-5)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
