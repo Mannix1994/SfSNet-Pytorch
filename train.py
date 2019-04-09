@@ -2,11 +2,12 @@
 from __future__ import absolute_import, division, print_function
 
 import torch
-import cv2
 from src import *
 from torch.utils.data import DataLoader
 from config import SFSNET_DATASET_DIR, SFSNET_DATASET_DIR_NPY
-import numpy as np
+import os
+import time
+from config import PROJECT_DIR
 
 if __name__ == '__main__':
     pass
@@ -17,6 +18,13 @@ if __name__ == '__main__':
 
 
 def train():
+    data_dir = os.path.join(PROJECT_DIR, 'data')
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
+    sta = Statistic('data/train_%s.csv' % t, True, 'epoch', 'step', 'total_step', 'learning_rate', 'loss')
+
+    # define batch size
     batch_size = 32
     # define net
     model = SfSNet()
@@ -46,7 +54,7 @@ def train():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
 
     # learning rate scheduler
-    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[1000, 2000, 3000], gamma=0.1)
+    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3000, 8000, 11000], gamma=0.1)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
@@ -57,7 +65,7 @@ def train():
     else:
         shading_layer = ShadingLayer(gpu=False)
 
-    step_size = len(train_dset)/batch_size
+    step_size = int(len(train_dset)/batch_size)
     try:
         for epoch in range(500):
             # fc_light_gt = label
@@ -111,7 +119,12 @@ def train():
                 optimizer.zero_grad()
                 total_loss.backward()
                 optimizer.step()
-                print(epoch, step, total_loss)
+
+                # save train log
+                record = [epoch, step, epoch * step_size + step, optimizer.param_groups[0]['lr'],
+                          total_loss.cpu().detach().numpy()]
+                sta.add(*record)
+                print(*record)
 
     except KeyboardInterrupt as e:
         print("用户主动退出...")
@@ -120,7 +133,6 @@ def train():
         print("其它异常...")
         raise
     finally:
-        import time
         t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
         with open('data/temp_%s.pth' % t, 'w') as f:
             torch.save(model.module.state_dict(), f)
