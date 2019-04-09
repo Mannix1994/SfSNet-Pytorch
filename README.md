@@ -54,6 +54,9 @@ config.py to your directory.
     
 # Predict
 
+if you train model with train.py, you should eval 
+your model with predict.py.
+
 * Put your image in directory `Images`, then
     ```bash
     python predict.py
