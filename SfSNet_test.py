@@ -107,7 +107,7 @@ if __name__ == '__main__':
         cv2.imshow("Recon", Irec)
         cv2.imshow("Shading", Ishd)
 
-        cv2.imwrite('shading.png', convert(Irec))
+        # cv2.imwrite('shading.png', convert(Irec))
         if cv2.waitKey(0) == 27:
             exit()
 
