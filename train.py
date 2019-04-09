@@ -133,6 +133,7 @@ def train():
         print("其它异常...")
         raise
     finally:
+        sta.save()
         t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
         with open('data/temp_%s.pth' % t, 'w') as f:
             torch.save(model.module.state_dict(), f)

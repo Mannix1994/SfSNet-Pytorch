@@ -52,7 +52,6 @@ class Statistic:
             self.__records = []
 
     def add(self, *values):
-        print(type(values))
         self._have_change = True
         if len(values) != len(self.__keys):
             warnings.warn('the length of values is not equal with keys')
