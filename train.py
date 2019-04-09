@@ -17,6 +17,14 @@ if __name__ == '__main__':
     # exit()
 
 
+def weight_init(layer):
+    if isinstance(layer, torch.nn.Conv2d) or isinstance(layer, torch.nn.Linear):
+        torch.nn.init.xavier_uniform_(layer.weight.data)
+        torch.nn.init.constant_(layer.bias.data, 0.)
+    elif isinstance(layer, torch.nn.ConvTranspose2d):
+        torch.nn.init.xavier_uniform_(layer.weight.data)
+
+
 def train():
     data_dir = os.path.join(PROJECT_DIR, 'data')
     if not os.path.exists(data_dir):
@@ -28,6 +36,8 @@ def train():
     batch_size = 32
     # define net
     model = SfSNet()
+    # init weights
+    model.apply(weight_init)
     # load last trained weight
     # with open('data/temp_2019.04.08_14.56.51.pth', 'r') as f:
     #     model.load_state_dict(torch.load(f))
@@ -45,7 +55,7 @@ def train():
 
     # define dataset
     # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
-    train_dset, test_dset = prepare_processed_dataset(SFSNET_DATASET_DIR_NPY)
+    train_dset, test_dset = prepare_processed_dataset(SFSNET_DATASET_DIR_NPY, size=128)
 
     # define dataloader
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=16)
@@ -54,9 +64,9 @@ def train():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
 
     # learning rate scheduler
-    # lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3000, 8000, 11000], gamma=0.1)
+    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3000, 6000, 10000], gamma=0.1)
     # lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=30, verbose=True)
-    lr_sch = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 5000, 1e-5)
+    # lr_sch = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 1000, 1e-4)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
@@ -67,6 +77,7 @@ def train():
     else:
         shading_layer = ShadingLayer(gpu=False)
 
+    image_size = 128*128*3.
     step_size = int(len(train_dset)/batch_size)
     try:
         for epoch in range(500):
@@ -116,7 +127,7 @@ def train():
                 # ------------
                 lloss = l2_layer(fc_light, fc_light_gt, label)
 
-                total_loss = reconloss + aloss + loss + lloss
+                total_loss = reconloss/image_size + aloss/image_size + loss/image_size + lloss/27
                 # backward
                 optimizer.zero_grad()
                 total_loss.backward()
