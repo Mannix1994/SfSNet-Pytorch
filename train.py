@@ -37,7 +37,7 @@ def train():
     batch_size = 32
     # define net
     # model = SfSNet()
-    model = SfSNetTrain()
+    model = SfSNet()
     # init weights
     model.apply(weight_init)
     # load last trained weight

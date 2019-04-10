@@ -16,7 +16,7 @@ class SfSNetEval:
         :param landmark_path: face landmark path
         """
         # define a SfSNet
-        net = SfSNetTrain()
+        net = SfSNet()
         # set to eval mode
         net.eval()
         # load weights
