@@ -248,7 +248,7 @@ class SfSNetTrain(SfSNet):
 
     def forward(self, inputs):
         normal, albedo, light = super(SfSNetTrain, self).forward(inputs)
-        return F.relu(normal), F.relu(albedo), F.tanh(light)
+        return F.relu(normal), F.relu(albedo), light
 
 
 if __name__ == '__main__':
