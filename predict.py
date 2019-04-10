@@ -16,7 +16,7 @@ class SfSNetEval:
         :param landmark_path: face landmark path
         """
         # define a SfSNet
-        net = SfSNet()
+        net = SfSNetTrain()
         # set to eval mode
         net.eval()
         # load weights
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
 
     # define sfsnet tool
-    ss = SfSNetEval('data/temp_2019.04.09_23.49.41.pth', LANDMARK_PATH)
+    ss = SfSNetEval('data/temp_2019.04.10_09.49.20.pth', LANDMARK_PATH)
 
     for image_name in image_list:
         # read image

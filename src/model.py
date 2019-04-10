@@ -242,6 +242,15 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         return self
 
 
+class SfSNetTrain(SfSNet):
+    def __init__(self):
+        super(SfSNetTrain, self).__init__()
+
+    def forward(self, inputs):
+        normal, albedo, light = super(SfSNetTrain, self).forward(inputs)
+        return F.relu(normal), F.relu(albedo), F.tanh(light)
+
+
 if __name__ == '__main__':
     net = SfSNet()
     net.eval()

@@ -7,7 +7,8 @@ from torch.utils.data import DataLoader
 from config import SFSNET_DATASET_DIR, SFSNET_DATASET_DIR_NPY
 import os
 import time
-from config import PROJECT_DIR
+from config import PROJECT_DIR, M
+import multiprocessing
 
 if __name__ == '__main__':
     pass
@@ -30,17 +31,18 @@ def train():
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
     t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
-    sta = Statistic('data/train_%s.csv' % t, True, 'epoch', 'step', 'total_step', 'learning_rate', 'loss')
+    sta = Statistic('data/temp_%s.pth.csv' % t, True, 'epoch', 'step', 'total_step', 'learning_rate', 'loss')
 
     # define batch size
     batch_size = 32
     # define net
-    model = SfSNet()
+    # model = SfSNet()
+    model = SfSNetTrain()
     # init weights
     model.apply(weight_init)
     # load last trained weight
-    # with open('data/temp_2019.04.09_23.48.35.pth', 'r') as f:
-    #     model.load_state_dict(torch.load(f))
+    with open('data/temp_2019.04.10_09.49.20.pth', 'r') as f:
+        model.load_state_dict(torch.load(f))
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         # dim = 0 [62, ...] -> [32, ...], [32, ...] on 2 GPUs
@@ -55,16 +57,16 @@ def train():
 
     # define dataset
     # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
-    train_dset, test_dset = prepare_processed_dataset(SFSNET_DATASET_DIR_NPY, size=128)
+    train_dset, test_dset = prepare_processed_dataset(SFSNET_DATASET_DIR_NPY, size=M)
 
     # define dataloader
-    dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=16)
+    dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())
 
     # define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0005)
 
     # learning rate scheduler
-    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3000, 6000, 10000], gamma=0.1)
+    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000], gamma=0.5)
     # lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=30, verbose=True)
     # lr_sch = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 1000, 1e-4)
 
@@ -77,7 +79,6 @@ def train():
     else:
         shading_layer = ShadingLayer(gpu=False)
 
-    image_size = 128*128*3.
     step_size = int(len(train_dset)/batch_size)
     try:
         for epoch in range(500):
@@ -127,7 +128,7 @@ def train():
                 # ------------
                 lloss = l2_layer(fc_light, fc_light_gt, label)
 
-                total_loss = reconloss/image_size + aloss/image_size + loss/image_size + lloss/27
+                total_loss = reconloss + aloss + loss + lloss
                 # backward
                 optimizer.zero_grad()
                 total_loss.backward()
@@ -147,9 +148,11 @@ def train():
         raise
     finally:
         sta.save()
-        t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
         with open('data/temp_%s.pth' % t, 'w') as f:
-            torch.save(model.module.cpu().state_dict(), f)
+            if torch.cuda.device_count() > 1:
+                torch.save(model.module.cpu().state_dict(), f)
+            else:
+                torch.save(model.cpu().state_dict(), f)
 
 
 if __name__ == '__main__':
