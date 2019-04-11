@@ -44,7 +44,7 @@ class Statistic:
         self._have_change = False
 
         if self.__auto_save:
-            self.__csv_file = open(csv_name, 'wb')
+            self.__csv_file = open(csv_name, 'w')
             self.__csv_writer = csv.writer(self.__csv_file)
             self.__csv_writer.writerow(self.__keys)
             self.__step = 0
@@ -71,7 +71,7 @@ class Statistic:
             self.__csv_file.close()
         else:
             # 保存记录
-            with open(self.__csv_name, 'wb') as f:
+            with open(self.__csv_name, 'w') as f:
                 writer = csv.writer(f)
                 # 写入标题行
                 writer.writerow(self.__keys)

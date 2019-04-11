@@ -29,11 +29,7 @@ def weight_init(layer):
 
 def load_train_config():
     try:
-        with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'r') as f:
-            train_config = pickle.load(f, encoding='latin1')
-            return train_config
-    except TypeError as e:
-        with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'r') as f:
+        with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'rb') as f:
             train_config = pickle.load(f)
             return train_config
     except IOError as e:
@@ -59,7 +55,7 @@ def train():
     model.apply(weight_init)
     # load last trained weight
     if train_config['weight'] != '':
-        with open(train_config['weight'], 'r') as f:
+        with open(train_config['weight'], 'rb') as f:
             model.load_state_dict(torch.load(f))
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -84,8 +80,8 @@ def train():
     optimizer = torch.optim.Adam(model.parameters(), lr=train_config['learning_rate'], weight_decay=0.0005)
 
     # learning rate scheduler
-    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000], gamma=0.5)
-    # lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=30, verbose=True)
+    # lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000], gamma=0.5)
+    lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=500, verbose=True)
     # lr_sch = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 1000, 1e-4)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
@@ -106,7 +102,7 @@ def train():
             print("epoch: ", epoch)
             train_config['epoch'] = epoch
             for step, (data, mask, normal, albedo, fc_light_gt, label) in enumerate(dloader):
-                lr_sch.step(epoch * step_size + step)
+                # lr_sch.step(epoch * step_size + step)
                 if torch.cuda.is_available():
                     data = data.cuda()
                     mask = mask.cuda()
@@ -153,9 +149,10 @@ def train():
                 total_loss.backward()
                 optimizer.step()
 
+                loss_ = total_loss.cpu().detach().numpy()
+                lr_sch.step(loss_)
                 # save train log
-                record = [epoch, step, epoch * step_size + step, optimizer.param_groups[0]['lr'],
-                          total_loss.cpu().detach().numpy()]
+                record = [epoch, step, epoch * step_size + step, optimizer.param_groups[0]['lr'], loss_]
                 train_config['learning_rate'] = record[3]
                 sta.add(*record)
                 print(*record)
@@ -169,15 +166,15 @@ def train():
     finally:
         sta.save()
         # save weights
-        with open('data/temp_%s.pth' % t, 'w') as f:
+        with open('data/temp_%s.pth' % t, 'wb') as f:
             if torch.cuda.device_count() > 1:
                 torch.save(model.module.cpu().state_dict(), f)
             else:
                 torch.save(model.cpu().state_dict(), f)
         # save train config
         train_config['weight'] = 'data/temp_%s.pth' % t
-        with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'w') as f:
-            pickle.dump(train_config, f)
+        with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'wb') as f:
+            pickle.dump(train_config, f, protocol=2)
 
 
 if __name__ == '__main__':
