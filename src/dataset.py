@@ -13,9 +13,9 @@ class SfSNetDataset(Dataset):
     def __init__(self, dataset_dir, dataset_ids, size=128):
         assert dataset_dir != '' and dataset_dir is not None
         assert isinstance(size, int) and size > 0
-        self._dataset_dir = dataset_dir
-        self._size = size
-        self._records = []
+        self.__dataset_dir = dataset_dir
+        self.__size = size
+        self.__records = []
         for base_dir in dataset_ids:
             base_id = int(base_dir) - 1
             start_id = base_id * 20 + 1
@@ -32,29 +32,41 @@ class SfSNetDataset(Dataset):
                             'label': 1,  # label, always be 1
                         }
                         # print(record)
-                        self._records.append(record)
+                        self.__records.append(record)
+
+    @property
+    def dataset_dir(self):
+        return self.__dataset_dir
+
+    @property
+    def size(self):
+        return self.__size
+
+    @property
+    def records(self):
+        return self.__records
 
     def _transform(self, image_path):
-        image = cv2.imread(join(self._dataset_dir, image_path))
-        image = cv2.resize(image, dsize=(self._size, self._size))
+        image = cv2.imread(join(self.__dataset_dir, image_path))
+        image = cv2.resize(image, dsize=(self.__size, self.__size))
         image = np.float32(image)
         image /= 255.0
         image = np.transpose(image, (2, 1, 0))
         return image
 
     def __getitem__(self, item):
-        record = self._records[item]
+        record = self.__records[item]
         albedo = self._transform(record['albedo'])
         face = self._transform(record['face'])
         normal = self._transform(record['normal'])
         mask = self._transform(record['mask'])
-        fc_light = np.array(np.loadtxt(join(self._dataset_dir, record['light'])), dtype=np.float32)
+        fc_light = np.array(np.loadtxt(join(self.__dataset_dir, record['light'])), dtype=np.float32)
         return from_numpy(face), from_numpy(mask), from_numpy(normal), \
                from_numpy(albedo), from_numpy(fc_light), \
                from_numpy(np.array([record['label'], ], dtype=np.float32))
 
     def __len__(self):
-        return len(self._records)
+        return len(self.__records)
 
 
 def prepare_dataset(dataset_dir, size=128):
@@ -73,25 +85,25 @@ class PreprocessDataset(SfSNetDataset):
     def __init__(self, dataset_dir, save_dir, size=128):
         dataset_ids = sorted(os.listdir(dataset_dir))
         super(PreprocessDataset, self).__init__(dataset_dir, dataset_ids, size)
-        self._save_dir = save_dir
+        self.__save_dir = save_dir
         for did in dataset_ids:
-            if not os.path.exists(join(self._save_dir, did)):
-                os.makedirs(join(self._save_dir, did))
+            if not os.path.exists(join(self.__save_dir, did)):
+                os.makedirs(join(self.__save_dir, did))
 
     def __getitem__(self, item):
-        record = self._records[item]
+        record = self.records[item]
         print(item, record['face'])
         albedo = self._transform(record['albedo'])
         face = self._transform(record['face'])
         normal = self._transform(record['normal'])
         mask = self._transform(record['mask'])
-        fc_light = np.array(np.loadtxt(join(self._dataset_dir, record['light'])), dtype=np.float32)
+        fc_light = np.array(np.loadtxt(join(self.dataset_dir, record['light'])), dtype=np.float32)
 
-        np.save(join(self._save_dir, record['albedo'].replace('.png', '.npy')), albedo)
-        np.save(join(self._save_dir, record['face'].replace('.png', '.npy')), face)
-        np.save(join(self._save_dir, record['normal'].replace('.png', '.npy')), normal)
-        np.save(join(self._save_dir, record['mask'].replace('.png', '.npy')), mask)
-        np.save(join(self._save_dir, record['light'].replace('.txt', '.npy')), fc_light)
+        np.save(join(self.__save_dir, record['albedo'].replace('.png', '.npy')), albedo)
+        np.save(join(self.__save_dir, record['face'].replace('.png', '.npy')), face)
+        np.save(join(self.__save_dir, record['normal'].replace('.png', '.npy')), normal)
+        np.save(join(self.__save_dir, record['mask'].replace('.png', '.npy')), mask)
+        np.save(join(self.__save_dir, record['light'].replace('.txt', '.npy')), fc_light)
         return fc_light
 
 
@@ -110,7 +122,7 @@ class ProcessedDataset(SfSNetDataset):
         self._save_dir = save_dir
 
     def __getitem__(self, item):
-        record = self._records[item]
+        record = self.records[item]
         albedo = np.load(join(self._save_dir, record['albedo'].replace('.png', '.npy')))
         face = np.load(join(self._save_dir, record['face'].replace('.png', '.npy')))
         normal = np.load(join(self._save_dir, record['normal'].replace('.png', '.npy')))
