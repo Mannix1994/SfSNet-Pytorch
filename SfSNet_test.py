@@ -54,10 +54,10 @@ def _test():
         # -----------add by wang-------------
         # from [1, 3, 128, 128] to [128, 128, 3]
         n_out = np.squeeze(n_out, 0)
-        n_out = np.transpose(n_out, [2, 1, 0])
+        n_out = np.transpose(n_out, [1, 2, 0])
         # from [1, 3, 128, 128] to [128, 128, 3]
         al_out = np.squeeze(al_out, 0)
-        al_out = np.transpose(al_out, [2, 1, 0])
+        al_out = np.transpose(al_out, [1, 2, 0])
         # from [1, 27] to [27, 1]
         light_out = np.transpose(light_out, [1, 0])
         # print n_out.shape, al_out.shape, light_out.shape
@@ -74,17 +74,13 @@ def _test():
         # transform
         n_out2 = n_out[:, :, (2, 1, 0)]
         # print 'n_out2 shape', n_out2.shape
-        n_out2 = cv2.rotate(n_out2, cv2.ROTATE_90_CLOCKWISE)  # imrotate(n_out2,-90)
-        n_out2 = np.fliplr(n_out2)
         n_out2 = 2 * n_out2 - 1  # [-1 1]
         nr = np.sqrt(np.sum(n_out2 ** 2, axis=2))  # nr=sqrt(sum(n_out2.^2,3))
         nr = np.expand_dims(nr, axis=2)
         n_out2 = n_out2 / np.repeat(nr, 3, axis=2)
         # print 'nr shape', nr.shape
 
-        al_out2 = cv2.rotate(al_out, cv2.ROTATE_90_CLOCKWISE)
-        al_out2 = al_out2[:, :, (2, 1, 0)]
-        al_out2 = np.fliplr(al_out2)
+        al_out2 = al_out[:, :, (2, 1, 0)]
 
         # Note: n_out2, al_out2, light_out is the actual output
         Irec, Ishd = create_shading_recon(n_out2, al_out2, light_out)
@@ -113,12 +109,14 @@ def _test():
         cv2.imshow("Shading", Ishd)
 
         # save result
-        cv2.imwrite('shading.png', convert(Ishd))
-        cv2.imwrite('Albedo.png', convert(al_out2))
+        cv2.imwrite('data/shading.png', convert(Ishd))
+        cv2.imwrite('data/Albedo.png', convert(al_out2))
         if cv2.waitKey(0) == 27:
             exit()
 
 
 if __name__ == '__main__':
+    d_path = os.path.join(PROJECT_DIR, 'data')
+    if not os.path.exists(d_path):
+        os.mkdir(d_path)
     _test()
-    pass
