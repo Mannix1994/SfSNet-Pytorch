@@ -7,10 +7,11 @@ import numpy as np
 from os.path import join
 from torch.utils.data import Dataset, DataLoader
 from torch import from_numpy
+from config import M
 
 
 class SfSNetDataset(Dataset):
-    def __init__(self, dataset_dir, dataset_ids, size=128):
+    def __init__(self, dataset_dir, dataset_ids, size=M):
         assert dataset_dir != '' and dataset_dir is not None
         assert isinstance(size, int) and size > 0
         self.__dataset_dir = dataset_dir
@@ -51,7 +52,7 @@ class SfSNetDataset(Dataset):
         image = cv2.resize(image, dsize=(self.__size, self.__size))
         image = np.float32(image)
         image /= 255.0
-        image = np.transpose(image, (2, 1, 0))
+        image = np.transpose(image, (2, 0, 1))
         return image
 
     def __getitem__(self, item):
@@ -82,7 +83,7 @@ def prepare_dataset(dataset_dir, size=128):
 
 
 class PreprocessDataset(SfSNetDataset):
-    def __init__(self, dataset_dir, save_dir, size=128):
+    def __init__(self, dataset_dir, save_dir, size=M):
         dataset_ids = sorted(os.listdir(dataset_dir))
         super(PreprocessDataset, self).__init__(dataset_dir, dataset_ids, size)
         self.__save_dir = save_dir
@@ -107,7 +108,7 @@ class PreprocessDataset(SfSNetDataset):
         return fc_light
 
 
-def process_dataset(dataset_dir, save_dir, size=128):
+def process_dataset(dataset_dir, save_dir, size=M):
     import multiprocessing
 
     pd = PreprocessDataset(dataset_dir, save_dir, size)
@@ -117,7 +118,7 @@ def process_dataset(dataset_dir, save_dir, size=128):
 
 
 class ProcessedDataset(SfSNetDataset):
-    def __init__(self, save_dir, dataset_ids, size=128):
+    def __init__(self, save_dir, dataset_ids, size=M):
         super(ProcessedDataset, self).__init__(save_dir, dataset_ids, size)
         self._save_dir = save_dir
 
@@ -134,7 +135,7 @@ class ProcessedDataset(SfSNetDataset):
                from_numpy(np.array([1, ], dtype=np.float32))
 
 
-def prepare_processed_dataset(save_dir, size=128):
+def prepare_processed_dataset(save_dir, size=M):
     ids = sorted(os.listdir(save_dir))
     np.random.shuffle(ids)
     # get 10% of ids as test dataset, the rest as train dataset
