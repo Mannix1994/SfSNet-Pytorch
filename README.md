@@ -16,7 +16,7 @@ If there are bugs in SfSNet_test.py, please open a issue.
 # Run SfSNet_test.py
 * Download shape_predictor_68_face_landmarks.dat from:
 http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 , 
-and uncompress it to project directory.
+and uncompress it to directory `data`.
 
 * Create and activate a virtual environment
     ```bash
