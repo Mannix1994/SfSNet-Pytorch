@@ -64,7 +64,7 @@ class SfSNetEval:
     def _get_numpy(tensor):
         n_array = tensor.cpu().detach().numpy()
         n_array = np.squeeze(n_array, 0)
-        n_array = np.transpose(n_array, [2, 1, 0])
+        n_array = np.transpose(n_array, [1, 2, 0])
         return n_array
 
     def predict(self, image, with_mask=False):
