@@ -10,17 +10,12 @@ from src import *
 
 
 class SfSNetEval:
-    def __init__(self, weight_path, landmark_path):
+    def __init__(self, net, landmark_path):
         """
-        :param weight_path: weights saved by train.py, not data/SfSNet.pth
+        :param net: a SfSNet object or SfSNetReLU object
         :param landmark_path: face landmark path
         """
-        # define a SfSNet
-        net = SfSNet()
-        # set to eval mode
-        net.eval()
-        # load weights
-        net.load_state_dict(torch.load(weight_path))
+        assert isinstance(net, SfSNet) or isinstance(net, SfSNetReLU)
         # use cuda
         if torch.cuda.is_available():
             net = net.cuda()
@@ -104,8 +99,14 @@ if __name__ == '__main__':
     # get image list
     image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
 
+    # define a SfSNet
+    net = SfSNet()
+    # set to eval mode
+    net.eval()
+    # load weights
+    net.load_state_dict(torch.load('data/temp_2019.04.13_12.59.58.pth'))
     # define sfsnet tool
-    ss = SfSNetEval('data/temp_2019.04.13_12.59.58.pth', LANDMARK_PATH)
+    ss = SfSNetEval(net, LANDMARK_PATH)
 
     for image_name in image_list:
         # read image

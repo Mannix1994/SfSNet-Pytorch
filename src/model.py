@@ -241,6 +241,16 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         self.is_cuda = False
         return self
 
+
+class SfSNetReLU(SfSNet):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, inputs):
+        normal, albedo, light = super().forward(inputs)
+        return F.relu(normal), F.relu(albedo), light
+
+
 if __name__ == '__main__':
     net = SfSNet()
     net.eval()
