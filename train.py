@@ -80,8 +80,8 @@ def train():
     optimizer = torch.optim.Adam(model.parameters(), lr=train_config['learning_rate'], weight_decay=0.0005)
 
     # learning rate scheduler
-    # lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000], gamma=0.5)
-    lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=500, verbose=True)
+    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
+    # lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=500, verbose=True)
     # lr_sch = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 1000, 1e-4)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
@@ -102,7 +102,7 @@ def train():
             print("epoch: ", epoch)
             train_config['epoch'] = epoch
             for step, (data, mask, normal, albedo, fc_light_gt, label) in enumerate(dloader):
-                # lr_sch.step(epoch * step_size + step)
+                lr_sch.step(epoch * step_size + step)
                 if torch.cuda.is_available():
                     data = data.cuda()
                     mask = mask.cuda()
@@ -150,7 +150,7 @@ def train():
                 optimizer.step()
 
                 loss_ = total_loss.cpu().detach().numpy()
-                lr_sch.step(loss_)
+                # lr_sch.step(loss_)
                 # save train log
                 record = [epoch, step, epoch * step_size + step, optimizer.param_groups[0]['lr'], loss_]
                 train_config['learning_rate'] = record[3]
