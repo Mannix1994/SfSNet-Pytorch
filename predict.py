@@ -7,6 +7,7 @@ import cv2
 import torch
 from config import M, LANDMARK_PATH, PROJECT_DIR
 from src import *
+from torch import cuda
 
 
 class SfSNetEval:
@@ -64,7 +65,7 @@ class SfSNetEval:
 
     def predict(self, image, with_mask=False):
         # compute mask and image
-        mask, im, o_im = self._read_image(image)
+        mask, im, original_image = self._read_image(image)
         # forward net
         Nconv0, Acov0, fc_light = self.net(im)
 
@@ -80,19 +81,19 @@ class SfSNetEval:
         recon = albech2 * shading
 
         # -----------add by wang------------
-        Ishd = self._get_numpy(shading)  # shading
-        al_out2 = self._get_numpy(Acov0)  # albedo
-        n_out2 = self._get_numpy(Nconv0)  # normal
-        Irec = self._get_numpy(recon)  # reconstructed image
+        shading = self._get_numpy(shading)  # shading
+        albedo = self._get_numpy(Acov0)  # albedo
+        normal = self._get_numpy(Nconv0)  # normal
+        recon_ = self._get_numpy(recon)  # reconstructed image
 
-        Irec = cv2.cvtColor(Irec, cv2.COLOR_RGB2BGR)
-        Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
+        recon_ = cv2.cvtColor(recon_, cv2.COLOR_RGB2BGR)
+        shading = cv2.cvtColor(shading, cv2.COLOR_RGB2GRAY)
         # -------------end---------------------
 
         if not with_mask:
-            return o_im, Irec, n_out2, al_out2, Ishd
+            return original_image, recon_, normal, albedo, shading
         else:
-            return o_im * mask, Irec * mask, n_out2 * mask, al_out2 * mask, Ishd * mask[..., 0]
+            return original_image * mask, recon_ * mask, normal * mask, albedo * mask, shading * mask[..., 0]
 
 
 if __name__ == '__main__':

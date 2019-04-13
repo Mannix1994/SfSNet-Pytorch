@@ -1,7 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function
 import torch
-import torchvision
 import pickle as pkl
 from torch import nn
 import torch.nn.functional as F
@@ -156,7 +155,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
         # lconcat1, shape(1 256 64 64)
         x = torch.cat((nrelu6r, arelu6r), 1)
         # lconcat2, shape(1 384 64 64)
-        x = torch.cat([x, conv3], 1)
+        x = torch.cat((x, conv3), 1)
         # lconv1/lbn1/lrelu1 shape(1 128 64 64)
         x = F.relu(self.lbn1(self.lconv1(x)))
         # lpool2r, shape(1 128 1 1)
@@ -173,7 +172,7 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
             try:
                 # for python3
                 name_weights = pkl.load(wp, encoding='latin1')
-            except TypeError as e:
+            except TypeError:
                 # for python2
                 name_weights = pkl.load(wp)
             state_dict = {}
@@ -244,10 +243,10 @@ class SfSNet(nn.Module):  # SfSNet = PS-Net in SfSNet_deploy.prototxt
 
 class SfSNetReLU(SfSNet):
     def __init__(self):
-        super().__init__()
+        super(SfSNetReLU, self).__init__()
 
     def forward(self, inputs):
-        normal, albedo, light = super().forward(inputs)
+        normal, albedo, light = super(SfSNetReLU, self).forward(inputs)
         return F.relu(normal), F.relu(albedo), light
 
 

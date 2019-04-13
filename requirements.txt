@@ -3,5 +3,5 @@ numpy==1.15.4
 matplotlib==2.2.3
 opencv-python==3.4.5.20
 dlib==19.16.0
-torch==1.0.0
+torch==1.0.1.post2
 torchvision==0.2.0
