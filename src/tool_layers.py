@@ -115,22 +115,3 @@ class ShadingLayer(Module):
 
         return top
 
-
-if __name__ == '__main__':
-    a = np.random.randn(2, 3, 4, 4)
-    t_a = torch.from_numpy(a)
-    nl = NormLayer()
-    cfm = ChangeFormLayer()
-    print(np.sum(np.abs(nl(t_a).numpy() - nl.numpy(a))))
-    print(np.sum(np.abs(cfm(t_a).numpy() - cfm.numpy(a))))
-
-    # test cpu
-    sl = ShadingLayer(False)
-    normal = np.random.randn(16, 3, 128, 128).astype(np.float32)
-    fc_lig = np.random.randn(16, 27).astype(np.float32)
-    print(np.sum(np.abs(sl(torch.from_numpy(normal), torch.from_numpy(fc_lig)).numpy()
-                        - sl.numpy(normal, fc_lig))))
-    # test gpu
-    sl2 = ShadingLayer(True)
-    print(np.sum(np.abs(sl2(torch.from_numpy(normal).cuda(), torch.from_numpy(fc_lig).cuda()).cpu().numpy()
-                        - sl2.numpy(normal, fc_lig))))

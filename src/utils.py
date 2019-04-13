@@ -28,7 +28,7 @@ def convert(src, dtype=np.uint8, max_value=255.0):
         dst[0, ...] = light_channel
         dst = cv2.cvtColor(dst, cv2.COLOR_LAB2BGR)*255
     else:
-        raise RuntimeError("src/utils.py(30): src.ndim should be 2 or 3")
+        raise ValueError("src/utils.py(30): src.ndim should be 2 or 3")
     return dst.astype(dtype)
 
 
