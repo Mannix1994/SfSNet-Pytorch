@@ -50,7 +50,7 @@ class SfSNetEval:
         # normalize to (0, 1.0)
         im = np.float32(im) / 255.0
         # from (128, 128, 3) to (1, 3, 128, 128)
-        im = np.transpose(im, [2, 1, 0])
+        im = np.transpose(im, [2, 0, 1])
         im = np.expand_dims(im, 0)
 
         mask = mask // 255
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
 
     # define sfsnet tool
-    ss = SfSNetEval('data/temp_2019.04.10_09.49.20.pth', LANDMARK_PATH)
+    ss = SfSNetEval('data/temp_2019.04.13_12.59.58.pth', LANDMARK_PATH)
 
     for image_name in image_list:
         # read image
