@@ -18,10 +18,17 @@ http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 ,
 and uncompress it to project_dir/data.
 
 * Create and activate a virtual environment
+    * for python 2.*
     ```bash
     pip install virtualenv
-    virtualenv venv
-    source venv/bin/activate
+    virtualenv -p python2 venv2
+    source venv2/bin/activate
+    ```
+    * for python 3.*
+    ```bash
+    pip install virtualenv
+    virtualenv -p python3 venv3
+    source venv3/bin/activate
     ```
 * Install python dependencies using command:
     ```bash
