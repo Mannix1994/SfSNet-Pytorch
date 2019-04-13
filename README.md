@@ -38,15 +38,20 @@ and uncompress it to project_dir/data.
     ```bash
     python SfSNet_test.py
     ```
-
+* Deactivate virtual environment
+    ```bash
+    deactivate
+    ```
 # Train
-* Download the SfSNet from the original SfSNet project and
+* Activate the same virtual environment created before if it does not
+been activated.
+* Download the SfSNet dataset from the original SfSNet project and
 uncompress it to a directory
 
 * Modify `SFSNET_DATASET_DIR` and `SFSNET_DATASET_DIR_NPY` in 
 config.py to your directory.
 
-* Run preprocess_dataset.py
+* Run preprocess_dataset.py to preprocess dataset
     ```bash
     python preprocess_dataset.py
     ```
@@ -64,6 +69,8 @@ config.py to your directory.
 if you train model with train.py, you should eval 
 your model with predict.py.
 
+* Activate the same virtual environment created before if it does not
+been activated.
 * Put your image in directory `Images`, then
     ```bash
     python predict.py
