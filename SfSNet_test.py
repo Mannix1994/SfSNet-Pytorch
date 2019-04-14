@@ -68,7 +68,8 @@ if __name__ == '__main__':
         """
 
         # transform
-        n_out2 = n_out[:, :, (2, 1, 0)]
+        # n_out2 = n_out[:, :, (2, 1, 0)]  # BGR to RGB
+        n_out2 = cv2.cvtColor(n_out, cv2.COLOR_BGR2RGB)  # BGR to RGB
         # print 'n_out2 shape', n_out2.shape
         n_out2 = 2 * n_out2 - 1  # [-1 1]
         nr = np.sqrt(np.sum(n_out2 ** 2, axis=2))  # nr=sqrt(sum(n_out2.^2,3))
@@ -76,7 +77,8 @@ if __name__ == '__main__':
         n_out2 = n_out2 / np.repeat(nr, 3, axis=2)
         # print 'nr shape', nr.shape
 
-        al_out2 = al_out[:, :, (2, 1, 0)]
+        # al_out2 = al_out[:, :, (2, 1, 0)]  # BGR to RGB
+        al_out2 = cv2.cvtColor(al_out, cv2.COLOR_BGR2RGB)  # BGR to RGB
 
         # Note: n_out2, al_out2, light_out is the actual output
         Irec, Ishd = create_shading_recon(n_out2, al_out2, light_out)
@@ -90,11 +92,7 @@ if __name__ == '__main__':
         # -----------add by wang------------
         Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
 
-        # al_out2 = (al_out2 / np.max(al_out2) * 255).astype(dtype=np.uint8)
-        # Irec = (Irec / np.max(Irec) * 255).astype(dtype=np.uint8)
-        # Ishd = (Ishd / np.max(Ishd) * 255).astype(dtype=np.uint8)
-
-        al_out2 = cv2.cvtColor(al_out2, cv2.COLOR_RGB2BGR)
+        al_out2 = cv2.cvtColor(al_out2, cv2.COLOR_RGB2BGR)  # RGB to BGR
         n_out2 = cv2.cvtColor(n_out2, cv2.COLOR_RGB2BGR)
         Irec = cv2.cvtColor(Irec, cv2.COLOR_RGB2BGR)
         # -------------end---------------------
