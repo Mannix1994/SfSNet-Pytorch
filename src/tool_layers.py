@@ -31,7 +31,7 @@ class NormLayer(Module):
         nor = bottom * 2 - 1
         ssq = torch.norm(nor, dim=1)
         ssq = ssq.view(sz[0], 1, sz[2], sz[3])
-        norm = ssq.repeat(1, sz[1], 1, 1) + 1e-8
+        norm = ssq.repeat(1, sz[1], 1, 1)
         return nor / norm
 
     def numpy(self, bottom):
@@ -43,7 +43,7 @@ class NormLayer(Module):
         nor = 2 * bottom - 1
         ssq = np.linalg.norm(nor, axis=1)
         ssq = np.reshape(ssq, (sz[0], 1, sz[2], sz[3]))
-        norm = np.tile(ssq, (1, sz[1], 1, 1)) + 1e-8
+        norm = np.tile(ssq, (1, sz[1], 1, 1))
         return np.divide(nor, norm)
 
 
