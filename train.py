@@ -1,15 +1,16 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function
-
-import torch
-from src import *
-from torch.utils.data import DataLoader
-from config import SFSNET_DATASET_DIR, SFSNET_DATASET_DIR_NPY
 import os
 import time
-from config import PROJECT_DIR, M
+import torch
 import multiprocessing
 import pickle
+from src import *
+from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import MultiStepLR, CosineAnnealingLR, ReduceLROnPlateau
+from config import SFSNET_DATASET_DIR, SFSNET_DATASET_DIR_NPY
+from config import PROJECT_DIR, M
+
 
 if __name__ == '__main__':
     pass
@@ -77,12 +78,12 @@ def train():
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())
 
     # define optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=train_config['learning_rate'], weight_decay=0.0005)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0005)
 
     # learning rate scheduler
-    lr_sch = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
-    # lr_sch = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=500, verbose=True)
-    # lr_sch = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 1000, 1e-4)
+    lr_sch = MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
+    lr_sch = ReduceLROnPlateau(optimizer, factor=0.5, patience=500, verbose=True)
+    # lr_sch = CosineAnnealingLR(optimizer, 1000, 1e-4)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
@@ -102,7 +103,7 @@ def train():
             print("epoch: ", epoch)
             train_config['epoch'] = epoch
             for step, (data, mask, normal, albedo, fc_light_gt, label) in enumerate(dloader):
-                lr_sch.step(epoch * step_size + step)
+                # lr_sch.step(epoch * step_size + step)
                 if torch.cuda.is_available():
                     data = data.cuda()
                     mask = mask.cuda()
@@ -150,7 +151,7 @@ def train():
                 optimizer.step()
 
                 loss_ = total_loss.cpu().detach().numpy()
-                # lr_sch.step(loss_)
+                lr_sch.step(loss_)
                 # save train log
                 record = [epoch, step, epoch * step_size + step, optimizer.param_groups[0]['lr'], loss_]
                 train_config['learning_rate'] = record[3]

@@ -2,12 +2,11 @@
 from __future__ import absolute_import, division, print_function
 import glob
 import os
-import numpy as np
 import cv2
 import torch
+import numpy as np
 from config import M, LANDMARK_PATH, PROJECT_DIR
 from src import *
-from torch import cuda
 
 
 class SfSNetEval:
