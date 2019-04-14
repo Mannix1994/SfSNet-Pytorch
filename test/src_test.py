@@ -14,8 +14,8 @@ def diff(tensor, array):
 
 
 class LossLayersTest(unittest.TestCase):
-    def __init__(self, methodName='runTest'):
-        super().__init__(methodName)
+    def __init__(self, method_name='runTest'):
+        super(LossLayersTest, self).__init__(method_name)
         self.l1_loss = L1LossLayerWt(0.6, 0.4)
         self.l2_loss = L2LossLayerWt(0.6, 0.4)
         self.data = np.random.randn(16, 3, 128, 128).astype(dtype=np.float32)
@@ -52,9 +52,9 @@ class LossLayersTest(unittest.TestCase):
 
 
 class ToolLayersTest(unittest.TestCase):
-    def __init__(self, methodName='runTest'):
-        super().__init__(methodName)
-        self.data = np.random.randn(2, 3, 4, 4)
+    def __init__(self, method_name='runTest'):
+        super(ToolLayersTest, self).__init__(method_name)
+        self.data = np.random.randn(16, 3, 128, 128)
         self.t_data = torch.from_numpy(self.data)
         self.nl = NormLayer()
         self.cfm = ChangeFormLayer()
@@ -98,6 +98,18 @@ class ToolLayersTest(unittest.TestCase):
             t_out = sl(torch.from_numpy(normal).cuda(), torch.from_numpy(fc_lig).cuda())
             n_out = sl.numpy(normal, fc_lig)
             self.assertTrue(diff(t_out, n_out) < 1e-5)
+
+    def testNormLayer(self):
+        t_out = self.nl(self.t_data)
+        n_out = self.nl.numpy(self.data)
+
+        # form SfSNet_test.py
+        n_out2 = 2 * self.data - 1  # [-1 1]
+        nr = np.sqrt(np.sum(n_out2 ** 2, axis=1, keepdims=True))
+        n_out2 = n_out2 / np.repeat(nr, 3, axis=1)
+
+        self.assertTrue(np.sum(np.abs(n_out - n_out2)) < 1e-10)
+        self.assertTrue(diff(t_out, n_out2) < 1e-10)
 
 
 if __name__ == '__main__':
