@@ -2,13 +2,12 @@
 from __future__ import absolute_import, division, print_function
 import os
 import time
-import torch
 import multiprocessing
 import pickle
 from src import *
 from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import MultiStepLR, CosineAnnealingLR, ReduceLROnPlateau
-from config import SFSNET_DATASET_DIR, SFSNET_DATASET_DIR_NPY
+from torch.optim.lr_scheduler import *
+from config import SFSNET_DATASET_DIR_NPY
 from config import PROJECT_DIR, M
 
 
@@ -33,7 +32,7 @@ def load_train_config():
         with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'rb') as f:
             train_config = pickle.load(f)
             return train_config
-    except IOError as e:
+    except IOError:
         train_config = {'epoch': 0, 'learning_rate': 0.01, 'weight': ''}
         return train_config
 
@@ -51,24 +50,24 @@ def train():
     batch_size = 32
     # define net
     # model = SfSNet()
-    model = SfSNet()
+    net = SfSNet()
     # init weights
-    model.apply(weight_init)
+    net.apply(weight_init)
     # load last trained weight
     if train_config['weight'] != '':
         with open(train_config['weight'], 'rb') as f:
-            model.load_state_dict(torch.load(f))
+            net.load_state_dict(torch.load(f))
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         # dim = 0 [62, ...] -> [32, ...], [32, ...] on 2 GPUs
-        model = torch.nn.DataParallel(model).cuda()
+        net = torch.nn.DataParallel(net).cuda()
         # set batch size to 64
-        batch_size = 32
+        batch_size = 64
     if torch.cuda.is_available():
-        model = model.cuda()
+        net = net.cuda()
 
     # set to train mode
-    model.train()
+    net.train()
 
     # define dataset
     # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
@@ -78,7 +77,7 @@ def train():
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())
 
     # define optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0005)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.005, weight_decay=0.0005)
 
     # learning rate scheduler
     # lr_sch = MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
@@ -112,7 +111,7 @@ def train():
                     fc_light_gt = fc_light_gt.cuda()
                     label = label.cuda()
                 # forward net
-                Nconv0, Acov0, fc_light = model(data)
+                Nconv0, Acov0, fc_light = net(data)
                 # ---------compute reconloss------------
                 # normalize
                 recnormal = normal_layer(Nconv0)
@@ -144,7 +143,7 @@ def train():
                 # ------------
                 lloss = l2_layer(fc_light, fc_light_gt, label)
 
-                total_loss = reconloss + aloss + loss + lloss
+                total_loss = (reconloss + aloss + loss + lloss)
                 # backward
                 optimizer.zero_grad()
                 total_loss.backward()
@@ -158,10 +157,10 @@ def train():
                 sta.add(*record)
                 print(*record)
 
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("用户主动退出...")
         pass
-    except IOError as r:
+    except IOError:
         print("其它异常...")
         raise
     finally:
@@ -169,9 +168,9 @@ def train():
         # save weights
         with open('data/temp_%s.pth' % t, 'wb') as f:
             if torch.cuda.device_count() > 1:
-                torch.save(model.module.cpu().state_dict(), f)
+                torch.save(net.module.cpu().state_dict(), f)
             else:
-                torch.save(model.cpu().state_dict(), f)
+                torch.save(net.cpu().state_dict(), f)
         # save train config
         train_config['weight'] = 'data/temp_%s.pth' % t
         with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'wb') as f:
