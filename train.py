@@ -63,7 +63,7 @@ def train():
         # dim = 0 [62, ...] -> [32, ...], [32, ...] on 2 GPUs
         model = torch.nn.DataParallel(model).cuda()
         # set batch size to 64
-        batch_size = 64
+        batch_size = 32
     if torch.cuda.is_available():
         model = model.cuda()
 

@@ -86,7 +86,8 @@ class SfSNetEval:
         recon_ = self._get_numpy(recon)  # reconstructed image
 
         recon_ = cv2.cvtColor(recon_, cv2.COLOR_RGB2BGR)
-        shading = cv2.cvtColor(shading, cv2.COLOR_RGB2GRAY)
+        shading = cv2.cvtColor(shading, cv2.COLOR_RGB2BGR)
+        # shading = cv2.cvtColor(shading, cv2.COLOR_RGB2GRAY)
         # -------------end---------------------
 
         if not with_mask:
