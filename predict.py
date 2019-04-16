@@ -80,9 +80,9 @@ class SfSNetEval:
         recon = albech2 * shading
 
         # -----------add by wang------------
-        shading = self._get_numpy(shading)  # shading
+        shading = (200 / 255.0) * self._get_numpy(shading)  # shading
         albedo = self._get_numpy(Acov0)  # albedo
-        normal = self._get_numpy(Nconv0)  # normal
+        normal = self._get_numpy(normalize)  # normal
         recon_ = self._get_numpy(recon)  # reconstructed image
 
         recon_ = cv2.cvtColor(recon_, cv2.COLOR_RGB2BGR)
@@ -93,7 +93,7 @@ class SfSNetEval:
         if not with_mask:
             return original_image, recon_, normal, albedo, shading
         else:
-            return original_image * mask, recon_ * mask, normal * mask, albedo * mask, shading * mask[..., 0]
+            return original_image * mask, recon_ * mask, normal * mask, albedo * mask, shading * mask
 
 
 if __name__ == '__main__':
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # set to eval mode
     net.eval()
     # load weights
-    net.load_state_dict(torch.load('data/temp_2019.04.13_12.59.58.pth'))
+    net.load_state_dict(torch.load('data/SfSNet.pth'))
     # define sfsnet tool
     ss = SfSNetEval(net, LANDMARK_PATH)
 
@@ -113,7 +113,7 @@ if __name__ == '__main__':
         # read image
         image = cv2.imread(image_name)
         # crop face and generate mask of face
-        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, False)
+        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, True)
 
         cv2.imshow("image", o_im)
         cv2.imshow("Normal", n_out2)
