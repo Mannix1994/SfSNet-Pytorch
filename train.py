@@ -142,7 +142,7 @@ def train():
                 albedo_m = albedo * mask
                 a_loss = l1_layer(arec, albedo_m, label)
                 # -----------loss--------------
-                n_rec = recnormal * mask
+                n_rec = Nconv0 * mask
                 normal_m = normal * mask
                 n_loss = l1_layer(n_rec, normal_m, label)
                 # ------------

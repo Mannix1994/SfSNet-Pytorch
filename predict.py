@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # set to eval mode
     net.eval()
     # load weights
-    net.load_state_dict(torch.load('data/SfSNet.pth'))
+    net.load_state_dict(torch.load('data/temp_2019.04.16_22.37.58.pth'))
     # define sfsnet tool
     ss = SfSNetEval(net, LANDMARK_PATH)
 
