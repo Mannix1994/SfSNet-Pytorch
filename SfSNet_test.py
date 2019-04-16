@@ -90,11 +90,13 @@ if __name__ == '__main__':
         Irec = Irec * mask
 
         # -----------add by wang------------
-        Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
 
         al_out2 = cv2.cvtColor(al_out2, cv2.COLOR_RGB2BGR)  # RGB to BGR
         n_out2 = cv2.cvtColor(n_out2, cv2.COLOR_RGB2BGR)
         Irec = cv2.cvtColor(Irec, cv2.COLOR_RGB2BGR)
+        Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2BGR)
+
+        Ishd = cv2.cvtColor(Ishd, cv2.COLOR_RGB2GRAY)
         # -------------end---------------------
 
         cv2.imshow("Normal", n_out2)
