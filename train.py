@@ -82,7 +82,7 @@ def train():
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())
 
     # define optimizer
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.005, weight_decay=0.0005)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.001, weight_decay=0.0005)
 
     # learning rate scheduler
     lr_sch = MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
@@ -138,7 +138,7 @@ def train():
 
                 recon_loss = l1_layer(mask_recon, mask_data, label)
                 # -------------aloss----------
-                arec = Acov0 * mask
+                arec = recnormal * mask
                 albedo_m = albedo * mask
                 a_loss = l1_layer(arec, albedo_m, label)
                 # -----------loss--------------
