@@ -85,9 +85,9 @@ def train():
     optimizer = torch.optim.Adam(net.parameters(), lr=0.001, weight_decay=0.0005)
 
     # learning rate scheduler
-    lr_sch = MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
+    # lr_sch = MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
     # lr_sch = ReduceLROnPlateau(optimizer, factor=0.5, patience=500, verbose=True)
-    # lr_sch = CosineAnnealingLR(optimizer, 1000, 1e-5)
+    lr_sch = CosineAnnealingLR(optimizer, 1000, 1e-5)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
     l1_layer = L1LossLayerWt(0.5, 0.5)
@@ -138,11 +138,11 @@ def train():
 
                 recon_loss = l1_layer(mask_recon, mask_data, label)
                 # -------------aloss----------
-                arec = recnormal * mask
+                arec = Acov0 * mask
                 albedo_m = albedo * mask
                 a_loss = l1_layer(arec, albedo_m, label)
                 # -----------loss--------------
-                n_rec = Nconv0 * mask
+                n_rec = recnormal * mask
                 normal_m = normal * mask
                 n_loss = l1_layer(n_rec, normal_m, label)
                 # ------------
