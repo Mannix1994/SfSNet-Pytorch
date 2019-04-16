@@ -37,6 +37,11 @@ def load_train_config():
         return train_config
 
 
+def to(*tensors):
+    ret = [x.cpu().detach().numpy() for x in tensors]
+    return ret
+
+
 def train():
     data_dir = os.path.join(PROJECT_DIR, 'data')
     if not os.path.exists(data_dir):
@@ -77,7 +82,7 @@ def train():
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())
 
     # define optimizer
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01, weight_decay=0.0005)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.005, weight_decay=0.0005)
 
     # learning rate scheduler
     lr_sch = MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
@@ -131,31 +136,32 @@ def train():
                 datach = change_form_layer(data)
                 mask_data = datach * maskch
 
-                reconloss = l1_layer(mask_recon, mask_data, label)
+                recon_loss = l1_layer(mask_recon, mask_data, label)
                 # -------------aloss----------
                 arec = Acov0 * mask
                 albedo_m = albedo * mask
-                aloss = l1_layer(arec, albedo_m, label)
+                a_loss = l1_layer(arec, albedo_m, label)
                 # -----------loss--------------
-                nrec = recnormal * mask
+                n_rec = Nconv0 * mask
                 normal_m = normal * mask
-                loss = l1_layer(nrec, normal_m, label)
+                n_loss = l1_layer(n_rec, normal_m, label)
                 # ------------
-                lloss = l2_layer(fc_light, fc_light_gt, label)
+                l_loss = l2_layer(fc_light, fc_light_gt, label)
 
-                total_loss = (reconloss + aloss + loss + lloss)
+                total_loss = (recon_loss + a_loss + n_loss + l_loss)
                 # backward
                 optimizer.zero_grad()
                 total_loss.backward()
                 optimizer.step()
 
                 loss_ = total_loss.cpu().detach().numpy()
+                _ret = to(recon_loss, a_loss, n_loss, l_loss)
                 # lr_sch.step(loss_)
                 # save train log
                 record = [epoch, step, epoch * step_size + step, optimizer.param_groups[0]['lr'], loss_]
                 train_config['learning_rate'] = record[3]
                 sta.add(*record)
-                print(*record)
+                print(*(record + _ret))
 
     except KeyboardInterrupt:
         print("用户主动退出...")

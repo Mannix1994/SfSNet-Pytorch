@@ -113,7 +113,7 @@ if __name__ == '__main__':
         # read image
         image = cv2.imread(image_name)
         # crop face and generate mask of face
-        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, True)
+        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, False)
 
         cv2.imshow("image", o_im)
         cv2.imshow("Normal", n_out2)
