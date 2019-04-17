@@ -4,6 +4,7 @@ import glob
 import os
 import cv2
 import torch
+import argparse
 import numpy as np
 from config import M, LANDMARK_PATH, PROJECT_DIR
 from src import *
@@ -97,6 +98,11 @@ class SfSNetEval:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-w', '--weights', help='The path to weights',
+                        default='data/temp_2019.04.17_11.24.48.pth')
+    args = parser.parse_args()
+
     # get image list
     image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
 
@@ -105,7 +111,7 @@ if __name__ == '__main__':
     # set to eval mode
     net.eval()
     # load weights
-    net.load_state_dict(torch.load('data/temp_2019.04.16_22.37.58.pth'))
+    net.load_state_dict(torch.load(args.weights))
     # define sfsnet tool
     ss = SfSNetEval(net, LANDMARK_PATH)
 
@@ -116,10 +122,10 @@ if __name__ == '__main__':
         o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, False)
 
         cv2.imshow("image", o_im)
-        cv2.imshow("Normal", n_out2)
-        cv2.imshow("Albedo", al_out2)
-        cv2.imshow("Recon", Irec)
-        cv2.imshow("Shading", Ishd)
+        cv2.imshow("Normal", convert(n_out2))
+        cv2.imshow("Albedo", convert(al_out2))
+        cv2.imshow("Recon", convert(Irec))
+        cv2.imshow("Shading", convert(Ishd))
 
         # cv2.imwrite('shading.png', convert(Irec))
         if cv2.waitKey(0) == 27:
