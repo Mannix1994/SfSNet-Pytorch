@@ -20,24 +20,24 @@ class L1LossLayerWt(Module):
         :param label: label2/label3/label1 flag for which data is synthetic
         :return: loss, a scalar
         """
-        diff = torch.abs(recon - recon_m)
+        if recon.size() != recon_m.size():
+            raise Exception("Inputs must have the same dimension.")
+        diff = recon - recon_m
 
-        tmp_sum = torch.sum(diff, dim=(1, 2, 3))  # only keep dim 0(batch size dimension)
-
-        new_label = torch.zeros_like(label, )
-
+        loss = 0.
         for i in range(label.size()[0]):
             if label[i] > 0:
-                new_label[i] = self._wt_real
+                wt = self._wt_real
             else:
-                new_label[i] = self._wt_syn
-        loss = torch.sum((tmp_sum*new_label))
+                wt = self._wt_syn
+            loss += wt * torch.sum(torch.abs(diff[i, ...]))
+
         loss /= recon.size()[0]
         return loss
 
     def numpy(self, recon, recon_m, label):
         # type: (np.ndarray, np.ndarray, np.ndarray) -> np.ndarray
-        diff = np.abs(recon - recon_m)
+        diff = recon - recon_m
         _sum = 0
         for i in range(recon.shape[0]):
             if label[i] > 0:
