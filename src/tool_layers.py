@@ -69,10 +69,9 @@ class ShadingLayer(Module):
             nx = recnormalch[i, 0, ...]
             ny = recnormalch[i, 1, ...]
             nz = recnormalch[i, 2, ...]
-            if self.__gpu:
-                H1 = self.c1 * torch.ones((sz[2], sz[3]), dtype=torch.float32).cuda()
-            else:
-                H1 = self.c1 * torch.ones((sz[2], sz[3]), dtype=torch.float32)
+
+            H1 = self.c1 * torch.ones((sz[2], sz[3]), dtype=torch.float32, device=recnormalch.device)
+
             H2 = self.c2 * nz
             H3 = self.c2 * nx
             H4 = self.c2 * ny
