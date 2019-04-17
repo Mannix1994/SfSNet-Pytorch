@@ -42,7 +42,7 @@ def load_caffe_net(mode=True):
     # caffe.set_mode_cpu()
 
     # prototxt文件
-    model_file = join(PROJECT_DIR, 'SfSNet-Caffe/SfSNet_deploy_train_test.prototxt')
+    model_file = join(PROJECT_DIR, 'SfSNet-Caffe/SfSNet_deploy_train_compare.prototxt')
     # 预先训练好的caffe模型
     weights = join(PROJECT_DIR, 'SfSNet-Caffe/SfSNet.caffemodel.h5')
     # 定义网络
