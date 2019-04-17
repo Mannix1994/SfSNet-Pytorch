@@ -82,10 +82,10 @@ def train():
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())
 
     # define optimizer
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.005, weight_decay=0.0005)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.01, weight_decay=0.0005)
 
     # learning rate scheduler
-    lr_sch = MultiStepLR(optimizer, milestones=[5000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
+    lr_sch = MultiStepLR(optimizer, milestones=[2000, 10000, 15000, 20000, 25000, 30000], gamma=0.5)
     # lr_sch = ReduceLROnPlateau(optimizer, factor=0.5, patience=500, verbose=True)
     # lr_sch = CosineAnnealingLR(optimizer, 1000, 1e-5)
 
