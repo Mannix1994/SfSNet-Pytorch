@@ -37,9 +37,9 @@ def load_torch_net(mode=True):
 
 def load_caffe_net(mode=True):
     # set gpu mode, if you don't have gpu, use caffe.set_mode_cpu()
-    caffe.set_mode_gpu()
-    caffe.set_device(0)
-    # caffe.set_mode_cpu()
+    # caffe.set_mode_gpu()
+    # caffe.set_device(0)
+    caffe.set_mode_cpu()
 
     # prototxt文件
     model_file = join(PROJECT_DIR, 'SfSNet-Caffe/SfSNet_deploy_train_compare.prototxt')
@@ -70,8 +70,8 @@ def train():
     # define batch size
     batch_size = 10
     # define net
-    torch_net = load_torch_net(False)
-    caffe_net = load_caffe_net(False)
+    torch_net = load_torch_net(True)
+    caffe_net = load_caffe_net(True)
 
     # define dataset
     # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
@@ -133,22 +133,22 @@ def train():
                 caffe_net.blobs['label2'].data[...] = label.numpy()
                 c_losses = caffe_net.forward()
 
-                # diff(caffe_net.blobs['Aconv0'].data, Acov0)
-                # diff(caffe_net.blobs['Nconv0'].data, Nconv0)
-                # diff(caffe_net.blobs['fc_light'].data, fc_light)
-                # diff(caffe_net.blobs['recnormal'].data, recnormal)
-                # diff(caffe_net.blobs['recnormalch'].data, recnormalch)
-                # diff(caffe_net.blobs['shading'].data, shading)
-                # diff(caffe_net.blobs['albedoch'].data, albedoch)
-                # diff(caffe_net.blobs['recon'].data, recon)
+                diff(caffe_net.blobs['Aconv0'].data, Acov0)
+                diff(caffe_net.blobs['Nconv0'].data, Nconv0)
+                diff(caffe_net.blobs['fc_light'].data, fc_light)
+                diff(caffe_net.blobs['recnormal'].data, recnormal)
+                diff(caffe_net.blobs['recnormalch'].data, recnormalch)
+                diff(caffe_net.blobs['shading'].data, shading)
+                diff(caffe_net.blobs['albedoch'].data, albedoch)
+                diff(caffe_net.blobs['recon'].data, recon)
                 diff(caffe_net.blobs['recon_mask'].data, recon_mask)
                 diff(caffe_net.blobs['data_mask'].data, data_mask)
                 diff(caffe_net.blobs['label2'].data, label)
                 diff(caffe_net.blobs['reconloss'].data, reconloss)
-                # diff(caffe_net.blobs['reconloss'].data, reconloss)
-                # diff(caffe_net.blobs['lloss'].data, lloss)
-                # diff(caffe_net.blobs['loss'].data, loss)
-                # diff(caffe_net.blobs['aloss'].data, aloss)
+                diff(caffe_net.blobs['reconloss'].data, reconloss)
+                diff(caffe_net.blobs['lloss'].data, lloss)
+                diff(caffe_net.blobs['loss'].data, loss)
+                diff(caffe_net.blobs['aloss'].data, aloss)
 
                 exit()
 
