@@ -29,8 +29,8 @@ class NormLayer(Module):
         # type: (torch.Tensor) -> torch.Tensor
         sz = bottom.size()
         nor = bottom * 2 - 1
-        ssq = torch.norm(nor, dim=1)
-        ssq = ssq.view(sz[0], 1, sz[2], sz[3])
+        ssq = torch.norm(nor, dim=1, keepdim=True)
+        # ssq = ssq.view(sz[0], 1, sz[2], sz[3])
         norm = ssq.repeat(1, sz[1], 1, 1)+1e-8
         return nor / norm
 
