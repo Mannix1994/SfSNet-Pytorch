@@ -68,7 +68,7 @@ def train():
         os.makedirs(data_dir)
 
     # define batch size
-    batch_size = 10
+    batch_size = 32
     # define net
     torch_net = load_torch_net(True)
     caffe_net = load_caffe_net(True)
