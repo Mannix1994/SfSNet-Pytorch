@@ -13,7 +13,7 @@ class L1LossLayerWt(Module):
         self._wt_syn = wt_syn
 
     def forward(self, recon, recon_m, label):
-        # type: (torch.Tensor, torch.Tensor, torch.Tensor) -> torch.Tensor
+        # type (torch.Tensor, torch.Tensor, torch.Tensor) -> torch.Tensor
         """
         :param recon: rec/arec/recon_mask normal/albedo/reconstructed image
         :param recon_m: normal_m/albedo_m ground truth of normal/albedo/image
@@ -64,31 +64,29 @@ class L2LossLayerWt(Module):
         :param label3: flag for which data is synthetic
         :return: loss, a scalar
         """
-        diff = (fc_light - fc_light_gt) ** 2
+        diff = fc_light - fc_light_gt
 
-        tmp_sum = torch.sum(diff, dim=(1, ))
-
-        new_label = torch.zeros_like(label3)
-
+        loss = 0
         for i in range(label3.size()[0]):
             if label3[i] > 0:
-                new_label[i] = self._wt_real
+                wt = self._wt_real
             else:
-                new_label[i] = self._wt_syn
+                wt = self._wt_syn
+            tmp = wt * torch.sum(diff[i, ...] ** 2)
+            loss = loss + tmp
 
-        loss = torch.sum((tmp_sum * new_label))
-        loss = loss / fc_light.size()[0] / 2
+        loss = loss/label3.size()[0]/2
         return loss
 
     def numpy(self, fc_light, label, label3):
         # type: (np.ndarray, np.ndarray, np.ndarray) -> np.ndarray
-        diff = np.abs(fc_light - label) ** 2
+        diff = fc_light - label
         _sum = 0
         for i in range(fc_light.shape[0]):
             if label3[i] > 0:
                 wt = self._wt_real
             else:
                 wt = self._wt_syn
-            tmp = wt * np.sum(diff[i, ...])
+            tmp = wt * np.sum(diff[i, ...]**2)
             _sum += tmp
         return _sum / fc_light.shape[0] / 2
