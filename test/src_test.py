@@ -18,11 +18,11 @@ class LossLayersTest(unittest.TestCase):
         super(LossLayersTest, self).__init__(method_name)
         self.l1_loss = L1LossLayerWt(0.6, 0.4)
         self.l2_loss = L2LossLayerWt(0.6, 0.4)
-        self.data = np.random.randn(16, 3, 128, 128).astype(dtype=np.float32)
-        self.ground_truth = np.random.randn(16, 3, 128, 128).astype(dtype=np.float32)
-        self.label = np.random.randint(0, 2, (16,)).astype(dtype=np.float32)
-        self.fc_light = np.random.randn(16, 27).astype(dtype=np.float32)
-        self.fc_light_ground_truth = np.random.randn(16, 27).astype(dtype=np.float32)
+        self.data = np.random.randn(64, 3, 128, 128).astype(dtype=np.float32)
+        self.ground_truth = np.random.randn(64, 3, 128, 128).astype(dtype=np.float32)
+        self.label = np.random.randint(0, 2, (64,)).astype(dtype=np.float32)
+        self.fc_light = np.random.randn(64, 27).astype(dtype=np.float32)
+        self.fc_light_ground_truth = np.random.randn(64, 27).astype(dtype=np.float32)
 
     def testL1LossLayerWtCPU(self):
         n_out = self.l1_loss.numpy(self.data, self.ground_truth, self.label)
@@ -54,7 +54,7 @@ class LossLayersTest(unittest.TestCase):
 class ToolLayersTest(unittest.TestCase):
     def __init__(self, method_name='runTest'):
         super(ToolLayersTest, self).__init__(method_name)
-        self.data = np.random.randn(32, 3, 128, 128)*100
+        self.data = np.random.randn(64, 3, 128, 128)*100
         self.t_data = torch.from_numpy(self.data)
         self.nl = NormLayer()
         self.cfm = ChangeFormLayer()
