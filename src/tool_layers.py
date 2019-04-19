@@ -51,7 +51,7 @@ class ShadingLayer(Module):
     def __init__(self, gpu):
         super(ShadingLayer, self).__init__()
         self.__gpu = gpu
-        self.att = np.pi * np.array([1, 2.0 / 3, 0.25], dtype=np.float32)
+        self.att = np.pi * np.array([1, 2.0 / 3, 0.25], dtype=np.float32)  # type: np.ndarray
         self.att = torch.from_numpy(self.att)
         if self.__gpu:
             self.att = self.att.cuda()
