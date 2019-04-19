@@ -72,7 +72,7 @@ def preproccess_celaba_dataset(dataset_dir, save_dir, size=M):
             np.save(join(save_dir, image_name+'_normal.npy'), n_out2)
             np.save(join(save_dir, image_name+'_albedo.npy'), al_out2)
             np.save(join(save_dir, image_name+'_mask.npy'), mask)
-            np.save(join(save_dir, image_name+'_light.npy'), mask)
+            np.save(join(save_dir, image_name+'_light.npy'), fc_light)
 
         cv2.imshow("image", face)
         cv2.imshow("Normal", n_out2)
