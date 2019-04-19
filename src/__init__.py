@@ -6,3 +6,4 @@ from .model import SfSNet, SfSNetReLU
 from .loss_layers import L1LossLayerWt, L2LossLayerWt
 from .tool_layers import ChangeFormLayer, ShadingLayer, NormLayer
 from .dataset import *
+from .tools import SfSNetEval
