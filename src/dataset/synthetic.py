@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function
 import os
 import cv2
-from torch import from_numpy
 from torch.utils.data import DataLoader
 from .base import SfSNetDataset
 from config import M

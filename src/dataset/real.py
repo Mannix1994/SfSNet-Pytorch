@@ -9,7 +9,6 @@ from src import *
 from ..tools import SfSNetEval
 from os.path import join
 import numpy as np
-from torch import from_numpy
 
 
 class CelabaDataset(SfSNetDataset):
