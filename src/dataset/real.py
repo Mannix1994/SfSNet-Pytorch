@@ -9,6 +9,7 @@ from src import *
 from ..tools import SfSNetEval
 from os.path import join
 import numpy as np
+from torch import from_numpy
 
 
 class CelabaDataset(SfSNetDataset):
@@ -26,11 +27,28 @@ class CelabaDataset(SfSNetDataset):
             }
             # print(record)
             self.records.append(record)
+            # print(record)
+
+    def __getitem__(self, item):
+        record = self.records[item]
+        return self.load(self.dataset_dir, record)
+
+    @staticmethod
+    def load(data_dir, record):
+        albedo = np.load(join(data_dir, record['albedo']))
+        face = np.load(join(data_dir, record['face']))
+        normal = np.load(join(data_dir, record['normal']))
+        mask = np.load(join(data_dir, record['mask']))
+        fc_light = np.load(join(data_dir, record['light']))
+
+        return from_numpy(face), from_numpy(mask), from_numpy(normal), \
+               from_numpy(albedo), from_numpy(fc_light), \
+               from_numpy(np.array([record['label'], ], dtype=np.float32))
 
 
 def prepare_celaba_dataset(dataset_dir, size=M):
     with open(os.path.join(dataset_dir, 'list.txt'), 'r') as f:
-        images = f.readlines()
+        images = [line.strip() for line in f]
         # get 10% of ids as test dataset, the rest as train dataset
         train_ids = images[0:int(0.9 * len(images))]
         test_ids = images[int(0.9 * len(images)):]
@@ -68,11 +86,11 @@ def preproccess_celaba_dataset(dataset_dir, save_dir, size=M, debug=False):
 
         if aligned:
             f.write(image_name+'\n')
-            np.save(join(save_dir, image_name+'_face.npy'), face)
-            np.save(join(save_dir, image_name+'_normal.npy'), n_out2)
-            np.save(join(save_dir, image_name+'_albedo.npy'), al_out2)
-            np.save(join(save_dir, image_name+'_mask.npy'), mask)
-            np.save(join(save_dir, image_name+'_light.npy'), fc_light)
+            np.save(join(save_dir, image_name+'_face.npy'), np.transpose(face, [2, 0, 1]))
+            np.save(join(save_dir, image_name+'_normal.npy'), np.transpose(n_out2, [2, 0, 1]))
+            np.save(join(save_dir, image_name+'_albedo.npy'), np.transpose(al_out2, [2, 0, 1]))
+            np.save(join(save_dir, image_name+'_mask.npy'), np.transpose(mask, [2, 0, 1]))
+            np.save(join(save_dir, image_name+'_light.npy'), np.squeeze(fc_light, 0))
 
         if debug:
             cv2.imshow("image", face)

@@ -1,7 +1,8 @@
 # coding=utf8
 from __future__ import absolute_import, division, print_function
 import os
-
+import cv2
+from torch import from_numpy
 from torch.utils.data import DataLoader
 from .base import SfSNetDataset
 from config import M
@@ -30,8 +31,27 @@ class SyntheticDataset(SfSNetDataset):
                         # print(record)
                         self.records.append(record)
 
+    def _transform(self, image_path):
+        image = cv2.imread(join(self.dataset_dir, image_path))
+        image = cv2.resize(image, dsize=(self.size, self.size))
+        image = np.float32(image)
+        image /= 255.0
+        image = np.transpose(image, (2, 0, 1))
+        return image
 
-def prepare_synthetic_dataset(dataset_dir, size=M):
+    def __getitem__(self, item):
+        record = self.records[item]
+        albedo = self._transform(record['albedo'])
+        face = self._transform(record['face'])
+        normal = self._transform(record['normal'])
+        mask = self._transform(record['mask'])
+        fc_light = np.array(np.loadtxt(join(self.dataset_dir, record['light'])), dtype=np.float32)
+        return from_numpy(face), from_numpy(mask), from_numpy(normal), \
+               from_numpy(albedo), from_numpy(fc_light), \
+               from_numpy(np.array([record['label'], ], dtype=np.float32))
+
+
+def prepare_sfsnet_dataset(dataset_dir, size=M):
     ids = sorted(os.listdir(dataset_dir))
     np.random.shuffle(ids)
     # get 10% of ids as test dataset, the rest as train dataset
@@ -43,10 +63,10 @@ def prepare_synthetic_dataset(dataset_dir, size=M):
     return train_dset, test_dset
 
 
-class PreprocessDataset(SyntheticDataset):
+class PreprocessSyntheticDataset(SyntheticDataset):
     def __init__(self, dataset_dir, save_dir, size=M):
         dataset_ids = sorted(os.listdir(dataset_dir))
-        super(PreprocessDataset, self).__init__(dataset_dir, dataset_ids, size)
+        super(PreprocessSyntheticDataset, self).__init__(dataset_dir, dataset_ids, size)
         self.__save_dir = save_dir
         for did in dataset_ids:
             if not os.path.exists(join(self.__save_dir, did)):
@@ -66,13 +86,13 @@ class PreprocessDataset(SyntheticDataset):
         np.save(join(self.__save_dir, record['normal'].replace('.png', '.npy')), normal)
         np.save(join(self.__save_dir, record['mask'].replace('.png', '.npy')), mask)
         np.save(join(self.__save_dir, record['light'].replace('.txt', '.npy')), fc_light)
-        return fc_light
+        return 1
 
 
 def preprocess_sfsnet_dataset(dataset_dir, save_dir, size=M):
     import multiprocessing
 
-    pd = PreprocessDataset(dataset_dir, save_dir, size)
-    dl = DataLoader(pd, 16, num_workers=multiprocessing.cpu_count())
+    pd = PreprocessSyntheticDataset(dataset_dir, save_dir, size)
+    dl = DataLoader(pd, 64, num_workers=multiprocessing.cpu_count())
     for d in dl:
         pass
