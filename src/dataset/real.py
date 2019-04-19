@@ -67,12 +67,13 @@ def preproccess_celaba_dataset(dataset_dir, save_dir, size=M):
         o_im, face, Irec, n_out2, al_out2, Ishd, mask, fc_light, aligned = ss.predict(image, True)
 
         if aligned:
-            f.write(image_name)
+            f.write(image_name+'\n')
             np.save(join(save_dir, image_name+'_face.npy'), face)
             np.save(join(save_dir, image_name+'_normal.npy'), n_out2)
             np.save(join(save_dir, image_name+'_albedo.npy'), al_out2)
             np.save(join(save_dir, image_name+'_mask.npy'), mask)
             np.save(join(save_dir, image_name+'_light.npy'), mask)
+
         cv2.imshow("image", face)
         cv2.imshow("Normal", n_out2)
         cv2.imshow("Albedo", al_out2)
