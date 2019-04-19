@@ -41,9 +41,8 @@ class CelabaDataset(SfSNetDataset):
         mask = np.load(join(data_dir, record['mask']))
         fc_light = np.load(join(data_dir, record['light']))
 
-        return from_numpy(face), from_numpy(mask), from_numpy(normal), \
-               from_numpy(albedo), from_numpy(fc_light), \
-               from_numpy(np.array([record['label'], ], dtype=np.float32))
+        return SfSNetDataset.to_tensor(face=face, mask=mask, normal=normal,
+                                       albedo=albedo, fc_light=fc_light, label=record['label'])
 
 
 def prepare_celaba_dataset(dataset_dir, size=M):

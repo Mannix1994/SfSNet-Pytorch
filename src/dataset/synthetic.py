@@ -46,9 +46,9 @@ class SyntheticDataset(SfSNetDataset):
         normal = self._transform(record['normal'])
         mask = self._transform(record['mask'])
         fc_light = np.array(np.loadtxt(join(self.dataset_dir, record['light'])), dtype=np.float32)
-        return from_numpy(face), from_numpy(mask), from_numpy(normal), \
-               from_numpy(albedo), from_numpy(fc_light), \
-               from_numpy(np.array([record['label'], ], dtype=np.float32))
+
+        return self.to_tensor(face=face, mask=mask, normal=normal, albedo=albedo,
+                              fc_light=fc_light, label=record['label'])
 
 
 def prepare_sfsnet_dataset(dataset_dir, size=M):

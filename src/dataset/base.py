@@ -33,3 +33,9 @@ class SfSNetDataset(Dataset):
 
     def __len__(self):
         return len(self.__records)
+
+    @staticmethod
+    def to_tensor(face, mask, normal, albedo, fc_light, label):
+        return from_numpy(face), from_numpy(mask), from_numpy(normal), \
+               from_numpy(albedo), from_numpy(fc_light), \
+               from_numpy(np.array([label, ], dtype=np.float32))
