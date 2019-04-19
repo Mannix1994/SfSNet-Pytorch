@@ -40,7 +40,7 @@ def prepare_celaba_dataset(dataset_dir, size=M):
         return train_dset, test_dset
 
 
-def preproccess_celaba_dataset(dataset_dir, save_dir, size=M):
+def preproccess_celaba_dataset(dataset_dir, save_dir, size=M, debug=False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -74,14 +74,15 @@ def preproccess_celaba_dataset(dataset_dir, save_dir, size=M):
             np.save(join(save_dir, image_name+'_mask.npy'), mask)
             np.save(join(save_dir, image_name+'_light.npy'), fc_light)
 
-        cv2.imshow("image", face)
-        cv2.imshow("Normal", n_out2)
-        cv2.imshow("Albedo", al_out2)
-        cv2.imshow("Recon", Irec)
-        cv2.imshow("Shading", Ishd)
+        if debug:
+            cv2.imshow("image", face)
+            cv2.imshow("Normal", n_out2)
+            cv2.imshow("Albedo", al_out2)
+            cv2.imshow("Recon", Irec)
+            cv2.imshow("Shading", Ishd)
 
-        # cv2.imwrite('shading.png', convert(Irec))
-        if cv2.waitKey(1) == 27:
-            f.close()
-            exit()
+            cv2.imwrite('shading.png', convert(Irec))
+            if cv2.waitKey(1) == 27:
+                f.close()
+                exit()
     f.close()
