@@ -81,7 +81,7 @@ def preproccess_celaba_dataset(dataset_dir, save_dir, size=M):
         cv2.imshow("Shading", Ishd)
 
         # cv2.imwrite('shading.png', convert(Irec))
-        if cv2.waitKey(0) == 27:
+        if cv2.waitKey(1) == 27:
             f.close()
             exit()
     f.close()
