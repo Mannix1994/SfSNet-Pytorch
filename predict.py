@@ -39,7 +39,7 @@ class SfSNetEval:
         elif not isinstance(image, np.ndarray):
             raise RuntimeError('image is not a str or numpy array')
         # crop face and generate mask of face
-        mask, im = self.mg.align(image, crop_size=(M, M))
+        mask, im, aligned = self.mg.align(image, crop_size=(M, M))
         o_im = im.copy()
         # resize
         im = cv2.resize(im, (M, M))
@@ -54,7 +54,7 @@ class SfSNetEval:
         im = torch.from_numpy(im)
         if torch.cuda.is_available():
             im = im.cuda()
-        return mask, im, o_im
+        return mask, im, o_im, aligned
 
     @staticmethod
     def _get_numpy(tensor):
@@ -65,7 +65,7 @@ class SfSNetEval:
 
     def predict(self, image, with_mask=False):
         # compute mask and image
-        mask, im, original_image = self._read_image(image)
+        mask, im, original_image, aligned = self._read_image(image)
         # forward net
         Nconv0, Acov0, fc_light = self.net(im)
 
@@ -85,26 +85,31 @@ class SfSNetEval:
         albedo = self._get_numpy(Acov0)  # albedo
         normal = self._get_numpy(normalize)  # normal
         recon_ = self._get_numpy(recon)  # reconstructed image
+        fc_light_ = fc_light.cpu().detach().numpy()
+        face_ = self._get_numpy(im)
 
         recon_ = cv2.cvtColor(recon_, cv2.COLOR_RGB2BGR)
         shading = cv2.cvtColor(shading, cv2.COLOR_RGB2BGR)
         # shading = cv2.cvtColor(shading, cv2.COLOR_RGB2GRAY)
         # -------------end---------------------
 
-        if not with_mask:
-            return original_image, recon_, normal, albedo, shading
-        else:
-            return original_image * mask, recon_ * mask, normal * mask, albedo * mask, shading * mask
+        if with_mask:
+            face_ *= mask
+            recon_ *= mask
+            normal *= mask
+            albedo *= mask
+            shading *= mask
+        return original_image, face_, recon_, normal, albedo, shading, mask, fc_light_, aligned
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weights', help='The path to weights',
-                        default='data/temp_2019.04.17_11.24.48.pth')
+                        default='data/temp_2019.04.19_19.00.10.pth')
     args = parser.parse_args()
 
     # get image list
-    image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
+    image_list = glob.glob(os.path.join(PROJECT_DIR, '我/*.*'))
 
     # define a SfSNet
     net = SfSNet()
@@ -117,9 +122,9 @@ if __name__ == '__main__':
 
     for image_name in image_list:
         # read image
-        image = cv2.imread(image_name)
+        image = cv2.imread('0001/000001_face_1_1.png')
         # crop face and generate mask of face
-        o_im, Irec, n_out2, al_out2, Ishd = ss.predict(image, False)
+        o_im, face, Irec, n_out2, al_out2, Ishd, _, _, _ = ss.predict(image, False)
 
         cv2.imshow("image", o_im)
         cv2.imshow("Normal", convert(n_out2))

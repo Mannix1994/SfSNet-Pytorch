@@ -38,7 +38,7 @@ class MaskGenerator:
         face_rects = self._detector(gray_image, 0)
         return face_rects
 
-    def align(self, image, crop_size=(240, 240), scale=3.5, show_landmarks=False, return_none=False):
+    def align(self, image, crop_size=(240, 240), scale=4, show_landmarks=False, return_none=False):
         """
         :param show_landmarks:
         :param scale:
@@ -64,14 +64,14 @@ class MaskGenerator:
             # rect = self._detector(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), 0)
             # cv2.rectangle(mask, (rect[i].left(), rect[i].top()),
             #               (rect[i].right(), rect[i].bottom()), (255, 255, 0))
-            return mask, image,
+            return mask, image, True
         else:
             sys.stderr.write("%s: Can't detect face in image\n" % __file__)
             image = cv2.resize(image, crop_size)
             if return_none:
-                return None, image
+                return None, image, False
             else:
-                return np.ones(image.shape, dtype=image.dtype)*255, image
+                return np.ones(image.shape, dtype=image.dtype)*255, image, False
 
     def _warp_and_crop_face(self, image, mask, landmarks, crop_size, scale):
         """
