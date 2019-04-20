@@ -87,7 +87,7 @@ def preproccess_celaba_dataset(dataset_dir, save_dir, size=M, debug=False):
             np.save(join(save_dir, image_name+'_face.npy'), np.transpose(face, [2, 0, 1]))
             np.save(join(save_dir, image_name+'_normal.npy'), np.transpose(n_out2, [2, 0, 1]))
             np.save(join(save_dir, image_name+'_albedo.npy'), np.transpose(al_out2, [2, 0, 1]))
-            np.save(join(save_dir, image_name+'_mask.npy'), np.transpose(mask, [2, 0, 1]))
+            np.save(join(save_dir, image_name+'_mask.npy'), np.transpose(mask, [2, 0, 1]).astype(np.float32))
             np.save(join(save_dir, image_name+'_light.npy'), np.squeeze(fc_light, 0))
 
         if debug:
