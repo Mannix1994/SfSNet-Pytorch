@@ -13,10 +13,6 @@ from config import PROJECT_DIR, M
 
 if __name__ == '__main__':
     pass
-    # model = SfSNet()
-    # with open('data/temp_1554633573.72.pth', 'r') as f:
-    #     model.load_state_dict(torch.load(f))
-    # exit()
 
 
 def weight_init(layer):
@@ -27,16 +23,6 @@ def weight_init(layer):
         torch.nn.init.xavier_uniform_(layer.weight.data)
 
 
-def load_train_config():
-    try:
-        with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'rb') as f:
-            train_config = pickle.load(f)
-            return train_config
-    except IOError:
-        train_config = {'epoch': 0, 'learning_rate': 0.01, 'weight': ''}
-        return train_config
-
-
 def to(*tensors):
     ret = [x.cpu().detach().numpy() for x in tensors]
     return ret
@@ -44,15 +30,16 @@ def to(*tensors):
 
 def train(stage):
     # check whether data directory is exist
-    data_dir = os.path.join(PROJECT_DIR, 'data')
-    if not os.path.exists(data_dir):
-        raise RuntimeError(data_dir + ' is not exist')
+    weights_dir = os.path.join(PROJECT_DIR, 'weights')
+    if not os.path.exists(weights_dir):
+        raise RuntimeError(weights_dir + ' is not exist')
     # define the time now
     t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
     # train log writer
-    sta = Statistic('data/temp_%s.pth.csv' % t, True, 'epoch', 'step', 'total_step', 'learning_rate', 'loss')
+    sta = Statistic(os.path.join(weights_dir, 'weights_%s.pth.csv' % t), True,
+                    'epoch', 'step', 'total_step', 'learning_rate', 'loss')
     # load train history
-    train_config = load_train_config()
+    train_config = TrainConfig(os.path.join(PROJECT_DIR, 'weights/train.config.json'))
     print(train_config)
 
     # define batch size
@@ -63,8 +50,8 @@ def train(stage):
     # init weights
     net.apply(weight_init)
     # load last trained weight
-    if train_config['weight'] != '':
-        with open(train_config['weight'], 'rb') as f:
+    if train_config.weights != '':
+        with open(train_config.weights, 'rb') as f:
             net.load_state_dict(torch.load(f))
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -109,12 +96,12 @@ def train(stage):
 
     step_size = int(len(train_dset)/batch_size)
     try:
-        for epoch in range(train_config['epoch'], 500, 1):
+        for epoch in range(train_config.epoch, 500, 1):
             # fc_light_gt = label
             # label3 = label1 = label2
             print('*' * 80)
             print("epoch: ", epoch)
-            train_config['epoch'] = epoch
+            train_config.epoch = epoch
             for step, (data, mask, normal, albedo, fc_light_gt, label) in enumerate(dloader):
                 lr_sch.step(epoch * step_size + step)
                 if torch.cuda.is_available():
@@ -168,7 +155,7 @@ def train(stage):
                 # lr_sch.step(loss_)
                 # save train log
                 record = [epoch, step, epoch * step_size + step, optimizer.param_groups[0]['lr'], loss_]
-                train_config['learning_rate'] = record[3]
+                train_config.learning_rate = record[3]
                 sta.add(*record)
                 print(*(record + _ret))
 
@@ -181,15 +168,15 @@ def train(stage):
     finally:
         sta.save()
         # save weights
-        with open('data/temp_%s.pth' % t, 'wb') as f:
+        weights_path = os.path.join(weights_dir, 'weights_%s.pth' % t)
+        with open(weights_path, 'wb') as f:
             if torch.cuda.device_count() > 1:
                 torch.save(net.module.cpu().state_dict(), f)
             else:
                 torch.save(net.cpu().state_dict(), f)
         # save train config
-        train_config['weight'] = 'data/temp_%s.pth' % t
-        with open(os.path.join(PROJECT_DIR, 'data/train.config.pkl'), 'wb') as f:
-            pickle.dump(train_config, f, protocol=2)
+        train_config.weights = weights_path
+        train_config.save()
 
 
 if __name__ == '__main__':
