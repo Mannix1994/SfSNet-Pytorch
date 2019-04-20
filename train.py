@@ -43,11 +43,15 @@ def to(*tensors):
 
 
 def train(stage):
+    # check whether data directory is exist
     data_dir = os.path.join(PROJECT_DIR, 'data')
     if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
+        raise RuntimeError(data_dir + ' is not exist')
+    # define the time now
     t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
+    # train log writer
     sta = Statistic('data/temp_%s.pth.csv' % t, True, 'epoch', 'step', 'total_step', 'learning_rate', 'loss')
+    # load train history
     train_config = load_train_config()
     print(train_config)
 
