@@ -42,7 +42,7 @@ def to(*tensors):
     return ret
 
 
-def train():
+def train(stage):
     data_dir = os.path.join(PROJECT_DIR, 'data')
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
@@ -75,8 +75,13 @@ def train():
     net.train()
 
     # define dataset
-    # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
-    train_dset, test_dset = prepare_processed_dataset(CELABA_DATASET_DIR_NPY, SFSNET_DATASET_DIR_NPY, size=M)
+    if stage == '0':
+        # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
+        train_dset, test_dset = prepare_processed_dataset(None, SFSNET_DATASET_DIR_NPY, size=M)
+    elif stage == '1':
+        train_dset, test_dset = prepare_processed_dataset(CELABA_DATASET_DIR_NPY, SFSNET_DATASET_DIR_NPY, size=M)
+    else:
+        raise RuntimeError("Wrong stage")
 
     # define dataloader
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())
@@ -184,4 +189,10 @@ def train():
 
 
 if __name__ == '__main__':
-    train()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('stage', default=0, type=int,
+                        help='if stage==0, train SfSNet with synthetic dataset, '
+                             'if stage==1, train SfSNet with real and synthetic dataset.')
+    arg = parser.parse_args()
+    train(arg.stage)
