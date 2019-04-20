@@ -62,26 +62,26 @@ synthetic dataset.
     * Stage 0  
         1. Run preprocess_dataset.py to preprocess synthetic dataset
             ```bash
-            python preprocess_dataset.py --stage 0
+            python preprocess_dataset.py 0
             ```
             the size of processed data is about 151.3GB.
 
         2. Run train.py
             ```bash
-            python train.py --stage 0
+            python train.py 0
             ```
             if you press CTRL+C, the weights of current model will
              be saved to ./data.
     * Stage 1  
         1. Run preprocess_dataset.py to preprocess real(CELABA) dataset
             ```bash
-            python preprocess_dataset.py --stage 1 --weights data/weights_2019.04.19_19.00.10.pth
+            python preprocess_dataset.py 1 --weights data/weights_2019.04.19_19.00.10.pth
             ```
             the size of processed data is about 141.7GB.
 
         2. Run train.py
             ```bash
-            python train.py --stage 1
+            python train.py 1
             ```
             if you press CTRL+C, the weights of current model will be 
             saved to ./data.
