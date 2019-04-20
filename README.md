@@ -75,7 +75,7 @@ synthetic dataset.
     * Stage 1  
         1. Run preprocess_dataset.py to preprocess real(CELABA) dataset
             ```bash
-            python preprocess_dataset.py --stage 1 --weights data/temp_2019.04.19_19.00.10.pth
+            python preprocess_dataset.py --stage 1 --weights data/weights_2019.04.19_19.00.10.pth
             ```
             the size of processed data is about 141.7GB.
 
@@ -95,5 +95,5 @@ your model with predict.py.
 been activated.
 * Put your image in directory `Images`, then
     ```bash
-    python predict.py --weights data/temp_2019.04.20_08.47.51.pth
+    python predict.py --weights data/weights_2019.04.20_08.47.51.pth
     ```

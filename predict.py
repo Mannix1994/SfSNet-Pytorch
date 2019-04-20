@@ -12,7 +12,7 @@ from src import *
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weights', help='The path to weights',
-                        default='data/temp_2019.04.19_19.00.10.pth')
+                        default='data/weights_2019.04.19_19.00.10.pth')
     args = parser.parse_args()
 
     # get image list
