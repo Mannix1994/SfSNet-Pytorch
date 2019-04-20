@@ -43,26 +43,48 @@ and uncompress it to project_dir/data.
     deactivate
     ```
 # Train
-* Activate the same virtual environment created before if it does not
-been activated.
-* Download the SfSNet dataset from the original SfSNet project and
-uncompress it to a directory
+* Activate the same virtual environment created 
+before if it does not been activated.
+* Download the SfSNet(synthetic) and CELABA(real) dataset from 
+the original SfSNet project and uncompress them.
 
 * Modify `SFSNET_DATASET_DIR` and `SFSNET_DATASET_DIR_NPY` in 
 config.py to your directory.
 
-* Run preprocess_dataset.py to preprocess dataset
-    ```bash
-    python preprocess_dataset.py
-    ```
-    the size of processed data is about 147.6GB.
+* Modify `CELABA_DATASET_DIR` and `CELABA_DATASET_DIR_NPY` in 
+config.py to your directory.
 
-* Run train.py
-    ```bash
-    python train.py
-    ```
-    if you press CTRL+C, the weights of current model will be 
-    saved to ./data.
+* Train SfSNet is split into two stages(please read the section
+3.1 of SfSNet paper). Stage 0 is train SfSNet with synthetic 
+dataset, then using the weights trained in stage to preprocess
+a real dataset CELABA. Stage 1 is train SfSNet with real and 
+synthetic dataset.
+    * Stage 0  
+        1. Run preprocess_dataset.py to preprocess synthetic dataset
+            ```bash
+            python preprocess_dataset.py --stage 0
+            ```
+            the size of processed data is about 151.3GB.
+
+        2. Run train.py
+            ```bash
+            python train.py --stage 0
+            ```
+            if you press CTRL+C, the weights of current model will
+             be saved to ./data.
+    * Stage 1  
+        1. Run preprocess_dataset.py to preprocess real(CELABA) dataset
+            ```bash
+            python preprocess_dataset.py --stage 1 --weights data/temp_2019.04.19_19.00.10.pth
+            ```
+            the size of processed data is about 141.7GB.
+
+        2. Run train.py
+            ```bash
+            python train.py --stage 1
+            ```
+            if you press CTRL+C, the weights of current model will be 
+            saved to ./data.
     
 # Predict
 
@@ -73,5 +95,5 @@ your model with predict.py.
 been activated.
 * Put your image in directory `Images`, then
     ```bash
-    python predict.py
+    python predict.py --weights data/temp_2019.04.20_08.47.51.pth
     ```
