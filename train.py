@@ -79,10 +79,10 @@ def train(stage):
     net.train()
 
     # define dataset
-    if stage == '0':
+    if stage == 0:
         # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
         train_dset, test_dset = prepare_processed_dataset(None, SFSNET_DATASET_DIR_NPY, size=M)
-    elif stage == '1':
+    elif stage == 1:
         train_dset, test_dset = prepare_processed_dataset(CELABA_DATASET_DIR_NPY, SFSNET_DATASET_DIR_NPY, size=M)
     else:
         raise RuntimeError("Wrong stage")
