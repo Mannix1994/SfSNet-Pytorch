@@ -1,7 +1,7 @@
 # coding=utf8
 from .functions import create_shading_recon, create_mask_fiducial
 from .mask import MaskGenerator
-from .utils import convert, Statistic
+from .utils import convert, Statistic, TrainConfig
 from .model import SfSNet, SfSNetReLU
 from .loss_layers import L1LossLayerWt, L2LossLayerWt
 from .tool_layers import ChangeFormLayer, ShadingLayer, NormLayer

@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import csv
 import warnings
+import json
 
 
 def _convert(src, max_value):
@@ -85,3 +86,63 @@ class Statistic:
         import sys
         if self._have_change:
             sys.stderr.write('Statistic: 还有数据没保存啊！！！\n')
+
+
+class TrainConfig:
+    def __init__(self, config_file):
+        self.__file = config_file
+        epoch = 0
+        weights = ''
+        learning_rate = 0.01
+        try:
+            with open(config_file, 'r') as f:
+                config_dict = json.load(f)
+                epoch = config_dict['epoch']
+                weights = config_dict['weights']
+                learning_rate = config_dict['learning_rate']
+        except IOError:
+            pass
+        except ValueError:
+            pass
+        finally:
+            self.__epoch = epoch
+            self.__weights = weights
+            self.__learning_rate = learning_rate
+
+    @property
+    def epoch(self):
+        return self.__epoch
+
+    @epoch.setter
+    def epoch(self, value):
+        assert isinstance(value, int)
+        self.__epoch = value
+
+    @property
+    def weights(self):
+        return self.__weights
+
+    @weights.setter
+    def weights(self, value):
+        assert isinstance(value, str)
+        self.__weights = value
+
+    @property
+    def learning_rate(self):
+        return self.__learning_rate
+
+    @learning_rate.setter
+    def learning_rate(self, value):
+        assert isinstance(value, float)
+        self.__learning_rate = value
+
+    def save(self):
+        d = self.dict()
+        with open(self.__file, 'w') as f:
+            json.dump(d, f)
+
+    def dict(self):
+        return {'epoch': self.epoch, 'weights': self.weights, 'learning_rate': self.learning_rate}
+
+    def __str__(self):
+        return str(self.dict())
