@@ -8,14 +8,15 @@ from src import *
 
 
 class SfSNetEval:
-    def __init__(self, net, landmark_path):
+    def __init__(self, net, landmark_path, use_gpu=True):
         """
         :param net: a SfSNet object or SfSNetReLU object
         :param landmark_path: face landmark path
         """
         assert isinstance(net, SfSNet) or isinstance(net, SfSNetReLU)
+        self.__gpu = use_gpu
         # use cuda
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and self.__gpu:
             net = net.cuda()
         self.net = net
 
@@ -25,7 +26,7 @@ class SfSNetEval:
         # tool layers
         self.normal_layer = NormLayer()
         self.change_form_layer = ChangeFormLayer()
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and self.__gpu:
             self.shading_layer = ShadingLayer(gpu=True)
         else:
             self.shading_layer = ShadingLayer(gpu=False)
@@ -49,7 +50,7 @@ class SfSNetEval:
         mask = mask // 255
 
         im = torch.from_numpy(im)
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and self.__gpu:
             im = im.cuda()
         return mask, im, o_im, aligned
 
