@@ -7,7 +7,7 @@ import pickle
 from src import *
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import *
-from config import SFSNET_DATASET_DIR_NPY
+from config import SFSNET_DATASET_DIR_NPY, CELABA_DATASET_DIR_NPY
 from config import PROJECT_DIR, M
 
 
@@ -76,7 +76,7 @@ def train():
 
     # define dataset
     # train_dset, test_dset = prepare_dataset(SFSNET_DATASET_DIR)
-    train_dset, test_dset = prepare_processed_dataset(SFSNET_DATASET_DIR_NPY, size=M)
+    train_dset, test_dset = prepare_processed_dataset(CELABA_DATASET_DIR_NPY, SFSNET_DATASET_DIR_NPY, size=M)
 
     # define dataloader
     dloader = DataLoader(train_dset, batch_size=batch_size, shuffle=True, num_workers=multiprocessing.cpu_count())

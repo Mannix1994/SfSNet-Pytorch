@@ -56,7 +56,7 @@ def prepare_celaba_dataset(dataset_dir, size=M):
         return train_dset, test_dset
 
 
-def preproccess_celaba_dataset(dataset_dir, save_dir, size=M, debug=False):
+def preproccess_celaba_dataset(dataset_dir, save_dir, stage_one_weights, debug=False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -69,7 +69,7 @@ def preproccess_celaba_dataset(dataset_dir, save_dir, size=M, debug=False):
     # set to eval mode
     net.eval()
     # load weights
-    net.load_state_dict(torch.load('data/SfSNet.pth'))
+    net.load_state_dict(torch.load(stage_one_weights))
     # define sfsnet tool
     ss = SfSNetEval(net, LANDMARK_PATH)
 
