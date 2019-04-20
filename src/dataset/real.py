@@ -47,6 +47,7 @@ class CelabaDataset(SfSNetDataset):
 def prepare_celaba_dataset(dataset_dir, size=M):
     with open(os.path.join(dataset_dir, 'list.txt'), 'r') as f:
         images = [line.strip() for line in f]
+        np.random.shuffle(images)
         # get 10% of ids as test dataset, the rest as train dataset
         train_ids = images[0:int(0.9 * len(images))]
         test_ids = images[int(0.9 * len(images)):]
