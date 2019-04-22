@@ -19,4 +19,4 @@ SFSNET_DATASET_DIR_NPY = '/home/creator/F/DATA_pose_15_npy'
 CELABA_DATASET_DIR = '/home/creator/Data/img_align_celeba'
 
 # processed CelabA dataset directory
-CELABA_DATASET_DIR_NPY = '/home/creator/Data/img_align_celeba_npy'
+CELABA_DATASET_DIR_NPY = '/home/creator/Projects/Dataset/img_align_celeba_npy'

@@ -9,11 +9,28 @@ from config import LANDMARK_PATH, PROJECT_DIR
 from src import *
 
 
+def find_newest_file(directory, suffix='.pth'):
+    lists = os.listdir(directory)
+    lists = [i for i in lists if i.endswith(suffix)]
+    lists.sort(key=lambda f_name: os.path.getmtime(os.path.join(directory, f_name)))
+    if len(lists) > 0:
+        return os.path.join(directory, lists[-1])
+    else:
+        raise RuntimeError("No *{} file in directory: {}".format(suffix, directory))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--weights', help='The path to weights',
-                        default='data/weights_2019.04.19_19.00.10.pth')
+    parser.add_argument('-w', '--weights', help='The path to weights')
+    parser.add_argument('-g', '--gpu', action='store_true', help='whether using gpu or not')
     args = parser.parse_args()
+
+    print(args)
+    if args.weights is None:
+        args.weights = find_newest_file('weights')
+
+    print("\nParameter weights is not defined. "
+          "predict.py will use the newest weight file: " + args.weights)
 
     # get image list
     image_list = glob.glob(os.path.join(PROJECT_DIR, 'Images/*.*'))
@@ -25,7 +42,7 @@ if __name__ == '__main__':
     # load weights
     net.load_state_dict(torch.load(args.weights))
     # define sfsnet tool
-    ss = SfSNetEval(net, LANDMARK_PATH)
+    ss = SfSNetEval(net, LANDMARK_PATH, args.gpu)
 
     for image_name in image_list:
         # read image
