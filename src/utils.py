@@ -34,7 +34,7 @@ def convert(src, dtype=np.uint8, max_value=255.0):
 
 
 class Statistic:
-    def __init__(self, csv_name, auto_save=False, *keys):
+    def __init__(self, csv_name, *keys, auto_save=False):
         # CSV文件名字
         self.__csv_name = csv_name
         # 自动保存
@@ -83,9 +83,8 @@ class Statistic:
         self._have_change = False
 
     def __del__(self):
-        import sys
         if self._have_change:
-            sys.stderr.write('Statistic: 还有数据没保存啊！！！\n')
+            print('Statistic: 还有数据没保存啊！！！')
 
 
 class TrainConfig:

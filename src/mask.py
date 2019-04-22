@@ -38,7 +38,8 @@ class MaskGenerator:
         face_rects = self._detector(gray_image, 0)
         return face_rects
 
-    def align(self, image, crop_size=(240, 240), scale=4, show_landmarks=False, return_none=False):
+    def align(self, image, crop_size=(240, 240), scale=4, show_landmarks=False,
+              return_none=False, warp_and_crop=False):
         """
         :param show_landmarks:
         :param scale:
@@ -58,8 +59,11 @@ class MaskGenerator:
                 self.show_landmarks(image, landmarks)
             # create mask using landmarks
             mask = create_mask_fiducial(landmarks.T, image)
-            # warp and crop image
-            mask, image = self._warp_and_crop_face(image, mask, landmarks, crop_size, scale)
+            if warp_and_crop:
+                # warp and crop image
+                mask, image = self._warp_and_crop_face(image, mask, landmarks, crop_size, scale)
+            else:
+                return cv2.resize(mask, crop_size), cv2.resize(image, crop_size), True
             # # detect rectangle
             # rect = self._detector(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), 0)
             # cv2.rectangle(mask, (rect[i].left(), rect[i].top()),

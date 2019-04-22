@@ -36,8 +36,8 @@ def train(stage):
     # define the time now
     t = time.strftime('%Y.%m.%d_%H.%M.%S', time.localtime(time.time()))
     # train log writer
-    sta = Statistic(os.path.join(weights_dir, 'weights_%s.pth.csv' % t), True,
-                    'epoch', 'step', 'total_step', 'learning_rate', 'loss')
+    sta = Statistic(os.path.join(weights_dir, 'weights_%s.pth.csv' % t),
+                    'epoch', 'step', 'total_step', 'learning_rate', 'loss', auto_save=True)
     # load train history
     train_config = TrainConfig(os.path.join(PROJECT_DIR, 'weights/train.config.json'))
     print(train_config)
