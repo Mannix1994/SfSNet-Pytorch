@@ -15,7 +15,7 @@ if __name__ == '__main__':
     if arg.stage == 0:
         print(arg)
         preprocess_sfsnet_dataset(SFSNET_DATASET_DIR, SFSNET_DATASET_DIR_NPY, M)
-    elif arg.stage == 1:
+    elif arg.stage == 1 and arg.weights:
         print(arg)
         preproccess_celaba_dataset(CELABA_DATASET_DIR, CELABA_DATASET_DIR_NPY, arg.weights, debug=True)
     else:
