@@ -49,7 +49,7 @@ if __name__ == '__main__':
         sta.add(image_name.split('/')[-1], direction)
 
         # cv2.imwrite('shading.png', convert(Irec))
-        if cv2.waitKey(0) == 27:
+        if cv2.waitKey(50) == 27:
             exit()
         sta.save()
 
