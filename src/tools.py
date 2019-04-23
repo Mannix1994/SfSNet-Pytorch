@@ -37,7 +37,7 @@ class SfSNetEval:
         elif not isinstance(image, np.ndarray):
             raise RuntimeError('image is not a str or numpy array')
         # crop face and generate mask of face
-        mask, im, aligned = self.mg.align(image, crop_size=(M, M))
+        aligned, mask, im, _ = self.mg.align(image, size=(M, M))[0]
         o_im = im.copy()
         # resize
         im = cv2.resize(im, (M, M))
