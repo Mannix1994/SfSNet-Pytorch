@@ -70,17 +70,15 @@ class MaskGenerator:
                 image, mask, r_mat = self._warp(image, mask, landmarks)
                 landmarks = self._get_rotated_points(landmarks, r_mat)
             if crop:
-                t1 = time.time()
                 if crop_function_version == 0:
                     image = self._crop_v0(image, landmarks, scale)
                     mask = self._crop_v0(mask, landmarks, scale)
                 elif crop_function_version == 1:
                     image, mask, suc_ = self._crop_v1(image, mask, scale)
-                    # if not suc_:
-                    sys.stderr.write('%s: Failed to crop image and mask\n' % __file__)
+                    if not suc_:
+                        sys.stderr.write('%s: Failed to crop image and mask\n' % __file__)
                 else:
                     raise RuntimeError("crop_function_version must be 0 or 1")
-                print(time.time() - t1)
 
             if resize:
                 return cv2.resize(mask, size), cv2.resize(image, size), True
