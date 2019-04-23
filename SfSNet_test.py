@@ -28,7 +28,7 @@ if __name__ == '__main__':
         # read image
         image = cv2.imread(image_name)
         # crop face and generate mask of face
-        mask, im = mg.align(image, crop_size=(M, M))
+        mask, im = mg.align(image, size=(M, M))
         mask = mask // 255
         cv2.imshow('image', im*mask)
         # resize

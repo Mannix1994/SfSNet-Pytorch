@@ -32,16 +32,17 @@ if __name__ == '__main__':
         # read image
         image = cv2.imread(image_name)
         # crop face and generate mask of face
-        o_im, face, Irec, n_out2, al_out2, Ishd, mask, _, _ = ss.predict(image, False)
+        o_im, face, Irec, n_out2, al_out2, Ishd, mask, _, _ = ss.predict(image, True)
 
         cv2.imshow("image", o_im)
-        # cv2.imshow("Normal", convert(n_out2))
-        # cv2.imshow("Albedo", convert(al_out2))
-        # cv2.imshow("Recon", convert(Irec))
-        cv2.imshow("Shading", convert(Ishd))
+        cv2.imshow("Normal", convert(n_out2))
+        cv2.imshow("Albedo", convert(al_out2))
+        cv2.imshow("Recon", convert(Irec))
 
         shading = convert(Ishd)
         shading = cv2.cvtColor(shading, cv2.COLOR_BGR2GRAY)
+        cv2.imshow("Shading", shading)
+
         print(shading.shape)
         direction, angle_count = which_direction(shading, mask, magnitude_threshold=10)
         angle_count = sorted(angle_count, key=lambda x: x[1], reverse=True)
@@ -49,9 +50,10 @@ if __name__ == '__main__':
         sta.add(image_name.split('/')[-1], direction)
 
         # cv2.imwrite('shading.png', convert(Irec))
-        if cv2.waitKey(50) == 27:
+        if cv2.waitKey(0) == 27:
+            sta.save()
             exit()
-        sta.save()
+    sta.save()
 
 
 if __name__ == '__main__':
