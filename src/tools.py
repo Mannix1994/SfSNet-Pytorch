@@ -5,16 +5,18 @@ import torch
 import numpy as np
 from config import M
 from src import *
+import random
 
 
 class SfSNetEval:
-    def __init__(self, net, landmark_path, use_gpu=True):
+    def __init__(self, net, landmark_path, use_gpu=True, warp_image=False):
         """
         :param net: a SfSNet object or SfSNetReLU object
         :param landmark_path: face landmark path
         """
         assert isinstance(net, SfSNet) or isinstance(net, SfSNetReLU)
         self.__gpu = use_gpu
+        self.__warp = warp_image
         # use cuda
         if torch.cuda.is_available() and self.__gpu:
             net = net.cuda()
@@ -37,7 +39,8 @@ class SfSNetEval:
         elif not isinstance(image, np.ndarray):
             raise RuntimeError('image is not a str or numpy array')
         # crop face and generate mask of face
-        aligned, mask, im, _ = self.mg.align(image, size=(M, M))[0]
+        diff = random.random() / 3
+        aligned, mask, im, _ = self.mg.align(image, size=(M, M), warp=self.__warp, scale=1.5 + diff)[0]
         o_im = im.copy()
         # resize
         im = cv2.resize(im, (M, M))
