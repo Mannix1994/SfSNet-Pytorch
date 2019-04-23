@@ -34,7 +34,7 @@ def _test():
         # read image
         image = cv2.imread(image_name)
         # crop face and generate mask of face
-        mask, im = mg.align(image, crop_size=(M, M))
+        aligned, mask, im, landmark = mg.align(image, size=(M, M))[0]
         # resize
         im = cv2.resize(im, (M, M))
         # normalize to (0, 1.0)
