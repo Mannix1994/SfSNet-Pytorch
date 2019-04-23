@@ -4,10 +4,11 @@ from __future__ import absolute_import, division, print_function
 
 import dlib
 import cv2
-import sys
 import numpy as np
 from src.functions import create_mask_fiducial
 from config import LANDMARK_PATH
+import time
+import sys
 
 
 class MaskGenerator:
@@ -38,8 +39,8 @@ class MaskGenerator:
         face_rects = self._detector(gray_image, 0)
         return face_rects
 
-    def align(self, image, size=(240, 240), scale=4, warp=True, crop=True, resize=True,
-              return_none=False, show_landmarks=False):
+    def align(self, image, size=(240, 240), scale=2, warp=True, crop=True, resize=True,
+              crop_function_version=1, return_none=False, show_landmarks=False):
         """
         warp and crop image
         https://blog.csdn.net/qq_39438636/article/details/79304130
@@ -50,6 +51,7 @@ class MaskGenerator:
         :param warp:
         :param crop:
         :param resize:
+        :param crop_function_version:
         :param return_none:
         :param show_landmarks:
         :return:
@@ -66,21 +68,26 @@ class MaskGenerator:
             mask = create_mask_fiducial(landmarks.T, image)
             if warp:
                 image, mask, r_mat = self._warp(image, mask, landmarks)
-                landmarks = self._get_rotated_landmarks(landmarks, r_mat)
+                landmarks = self._get_rotated_points(landmarks, r_mat)
             if crop:
-                image = self._crop(image, landmarks, scale)
-                mask = self._crop(mask, landmarks, scale)
+                t1 = time.time()
+                if crop_function_version == 0:
+                    image = self._crop_v0(image, landmarks, scale)
+                    mask = self._crop_v0(mask, landmarks, scale)
+                elif crop_function_version == 1:
+                    image, mask, suc_ = self._crop_v1(image, mask, scale)
+                    # if not suc_:
+                    sys.stderr.write('%s: Failed to crop image and mask\n' % __file__)
+                else:
+                    raise RuntimeError("crop_function_version must be 0 or 1")
+                print(time.time() - t1)
 
-            # # detect rectangle
-            # rect = self._detector(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), 0)
-            # cv2.rectangle(mask, (rect[i].left(), rect[i].top()),
-            #               (rect[i].right(), rect[i].bottom()), (255, 255, 0))
             if resize:
                 return cv2.resize(mask, size), cv2.resize(image, size), True
             else:
                 return mask, image, True
         else:
-            sys.stderr.write("%s: Can't detect face in image\n" % __file__)
+            sys.stderr.writewarn("%s: Can't detect face in image\n" % __file__)
             image = cv2.resize(image, size)
             if return_none:
                 return None, image, False
@@ -88,20 +95,20 @@ class MaskGenerator:
                 return np.ones(image.shape, dtype=image.dtype) * 255, image, False
 
     @staticmethod
-    def _get_rotated_landmarks(landmarks, rotate_mat):
+    def _get_rotated_points(points, rotate_mat):
         # Blog； https://www.cnblogs.com/zhoug2020/p/7842808.html
         # add 1 to every point
-        __padding = np.ones((landmarks.shape[0], 1), dtype=landmarks.dtype)
-        landmarks = np.concatenate([landmarks, __padding], axis=1)
+        __padding = np.ones((points.shape[0], 1), dtype=points.dtype)
+        points = np.concatenate([points, __padding], axis=1)
         # add [0, 0, 1] to rotate matrix
-        __padding = np.array([0, 0, 1], dtype=landmarks.dtype).reshape(1, 3)
+        __padding = np.array([0, 0, 1], dtype=points.dtype).reshape(1, 3)
         rotate_mat = np.concatenate([rotate_mat, __padding], axis=0)
         # compute rotated landmarks
-        rotate_landmarks = np.matmul(rotate_mat, landmarks.T)
+        rotate_landmarks = np.matmul(rotate_mat, points.T)
         # remove the padding and transpose landmarks
         rotate_landmarks = rotate_landmarks[0:2, :].T
         # return landmark as integer numpy array
-        return rotate_landmarks.astype(landmarks.dtype)
+        return rotate_landmarks.astype(points.dtype)
 
     @staticmethod
     def _warp(image, mask, landmarks):
@@ -131,8 +138,7 @@ class MaskGenerator:
 
         return rotated_image, rotated_mask, rot_mat
 
-    @staticmethod
-    def _crop(image, landmarks, scale):
+    def _crop_v0(self, image, landmarks, scale):
         """
         crop image by face landmarks
         :param image:
@@ -156,10 +162,10 @@ class MaskGenerator:
         size = distance * scale
         # print(center_point)
         # compute row_start, row_end, col_start, col_end
-        row_start = int(center_point[1] - size / 2.0)
-        row_end = int(center_point[1] + size / 2.0)
-        col_start = int(center_point[0] - size / 2.0)
-        col_end = int(center_point[0] + size / 2.0)
+        row_start = int(center_point[1] - size)
+        row_end = int(center_point[1] + size)
+        col_start = int(center_point[0] - size)
+        col_end = int(center_point[0] + size)
         # print('*' * 10)
         # print(row_start, row_end, col_start, col_end)
         # make range valid and compute padding
@@ -186,6 +192,63 @@ class MaskGenerator:
         # print(row_start, row_end, col_start, col_end)
         # print('*' * 10)
         # crop image
+        cropped_image = self._crop_helper(image, row_start, row_end, col_start, col_end,
+                                          padding_up, padding_down, padding_left, padding_right)
+        return cropped_image
+
+    def _crop_v1(self, image, mask, scale):
+        face_rects = self.bounding_boxes(image)
+        if len(face_rects) == 0:
+            return image, mask, False
+        # define crop size
+        size = (face_rects[0].right() - face_rects[0].left()) / 2
+        size *= scale
+        # define new center point use mid_x and y from nose point
+        _x = (face_rects[0].left() + face_rects[0].right()) // 2
+        _y = (face_rects[0].top() + face_rects[0].bottom()) // 2
+        center_point = [_x, _y]
+        # compute the distance between left eye(landmarks[36])
+        # print(center_point)
+        # compute row_start, row_end, col_start, col_end
+        row_start = int(center_point[1] - size)
+        row_end = int(center_point[1] + size)
+        col_start = int(center_point[0] - size)
+        col_end = int(center_point[0] + size)
+        # print('*' * 10)
+        # print(row_start, row_end, col_start, col_end)
+        # make range valid and compute padding
+        if row_start < 0:
+            padding_up = abs(row_start)
+            row_start = 0
+        else:
+            padding_up = 0
+        if col_start < 0:
+            padding_left = abs(col_start)
+            col_start = 0
+        else:
+            padding_left = 0
+        if row_end > (image.shape[0] - 1):
+            padding_down = row_end - (image.shape[0] - 1)
+            row_end = image.shape[0] - 1
+        else:
+            padding_down = 0
+        if col_end > (image.shape[1] - 1):
+            padding_right = col_end - (image.shape[1] - 1)
+            col_end = image.shape[1] - 1
+        else:
+            padding_right = 0
+        # print(row_start, row_end, col_start, col_end)
+        # print('*' * 10)
+        # crop image
+        image = self._crop_helper(image, row_start, row_end, col_start, col_end,
+                                  padding_up, padding_down, padding_left, padding_right)
+        mask = self._crop_helper(mask, row_start, row_end, col_start, col_end,
+                                 padding_up, padding_down, padding_left, padding_right)
+        return image, mask, True
+
+    @staticmethod
+    def _crop_helper(image, row_start, row_end, col_start, col_end,
+                     padding_up, padding_down, padding_left, padding_right):
         cropped_image = image[row_start:row_end, col_start:col_end]
 
         # add padding to image
@@ -204,6 +267,7 @@ class MaskGenerator:
             padding = np.zeros(shape=(rows, padding_right, 3), dtype=cropped_image.dtype)
             cropped_image = np.hstack((cropped_image, padding))
         return cropped_image
+
 
     def _warp_and_crop_face(self, image, mask, landmarks, crop_size, scale):
         """
@@ -299,7 +363,7 @@ if __name__ == '__main__':
     mask_gen = MaskGenerator(LANDMARK_PATH)
     for _path in images:
         _im = cv2.imread(_path)
-        ma, im, _ = mask_gen.align(_im, warp=True, crop=False, resize=False)
+        ma, im, _ = mask_gen.align(_im, warp=True, crop=True, resize=True)
         cv2.imshow('mask', ma)
         cv2.imshow('image', im)
         if cv2.waitKey(0) == 27:
