@@ -86,8 +86,8 @@ def train(stage):
     lr_sch = CosineAnnealingLR(optimizer, 1000, 1e-5)
 
     l2_layer = L2LossLayerWt(0.1, 0.1)
-    l1_layer = L1LossLayerWt(wt_real=0.4, wt_syn=0.6)
-    l1_layer_recon = L1LossLayerWt(wt_real=0.6, wt_syn=0.4)
+    l1_layer = L1LossLayerWt(wt_real=0.5, wt_syn=0.5)
+    l1_layer_recon = L1LossLayerWt(wt_real=0.5, wt_syn=0.5)
     normal_layer = NormLayer()
     change_form_layer = ChangeFormLayer()
     if torch.cuda.is_available():
